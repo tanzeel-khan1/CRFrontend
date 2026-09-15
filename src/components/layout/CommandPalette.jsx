@@ -4,16 +4,14 @@ import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList
 } from '@/components/ui/command';
 import {
-  LayoutDashboard, Users, Receipt, FileText, FolderOpen, Activity, TrendingUp, Settings
+  LayoutDashboard, Receipt, FileText, FolderOpen, TrendingUp, Settings
 } from 'lucide-react';
 
 const commands = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
-  { label: 'Investors', icon: Users, path: '/investors' },
   { label: 'Expenses', icon: Receipt, path: '/expenses' },
   { label: 'Invoices', icon: FileText, path: '/invoices' },
   { label: 'Documents', icon: FolderOpen, path: '/documents' },
-  { label: 'Activity Log', icon: Activity, path: '/activity' },
   { label: 'Analytics', icon: TrendingUp, path: '/analytics' },
   { label: 'Settings', icon: Settings, path: '/settings' },
 ];

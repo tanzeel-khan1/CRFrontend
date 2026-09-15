@@ -1,6 +1,4 @@
-// const API_BASE = import.meta.env.VITE_API_URL || 'https://investor-api.moduleminds.ltd';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'https://corevia.bonto.run';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const getToken = () => localStorage.getItem('token');
 
 
@@ -135,6 +133,8 @@ export const api = {
     Expense:     entity('expenses'),
     Invoice:     entity('invoices'),
     Investor:    entity('investors'),
+    Client:      entity('clients'),
+    Property:    entity('properties'),
     Employee:    entity('employees'),
     Note:        entity('notes'),
     Idea:        entity('ideas'),

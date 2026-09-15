@@ -9,7 +9,8 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import AppLayout from './components/layout/AppLayout';
 import PersonalLayout from './components/personal/PersonalLayout';
 import Dashboard from './pages/Dashboard';
-import Investors from './pages/Investors';
+import Clients from './pages/Clients';
+import Properties from './pages/Properties';
 import Expenses from './pages/Expenses';
 import Invoices from './pages/Invoices';
 import Documents from './pages/Documents';
@@ -20,7 +21,6 @@ import Settings from './pages/Settings';
 import Ideas from './pages/Ideas';
 import Notepad from './pages/Notepad.jsx';
 import Employees from './pages/Employees';
-import Passwords from './pages/Passwords';
 import Chat from './pages/Chat';
 import PersonalHome from './pages/PersonalHome';
 import Login from './pages/Login';
@@ -58,7 +58,8 @@ const AuthenticatedApp = () => {
 
       <Route element={isAuthenticated ? <AppLayout /> : <Navigate to="/login" />}>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/investors" element={<Investors />} />
+        <Route path="/clients" element={<Clients />} />
+        <Route path="/properties" element={<Properties />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/documents" element={<Documents />} />
@@ -68,7 +69,6 @@ const AuthenticatedApp = () => {
         <Route path="/ideas" element={<Ideas />} />
         <Route path="/notepad" element={<Notepad />} />
         <Route path="/employees" element={<Employees />} />
-        <Route path="/passwords" element={<Passwords />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/business-plan" element={<BusinessPlan />} />
         <Route path="/stepper" element={<Stepper />} />

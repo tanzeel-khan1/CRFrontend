@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Building2, Users, Receipt, FileText,
-  FolderOpen, Activity, Settings, ChevronDown, Plus,
-  LogOut, BarChart2, Lightbulb, NotebookPen, UserSquare2, Home, KeyRound, MessageSquare, BookMarked, ListOrdered, ScrollText,
-  User,Calendar, TargetIcon
+  FolderOpen, Settings, ChevronDown, Plus,
+  LogOut, BarChart2, Lightbulb, NotebookPen, UserSquare2, Home, KeyRound, MessageSquare, BookMarked, ScrollText,
+  User
 } from "lucide-react";
 import { api } from "@/api/apiClient";
 import {
@@ -17,21 +17,17 @@ import {
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/investors", label: "Investors", icon: Users },
+  { path: "/clients", label: "Clients", icon: Users },
+  { path: "/properties", label: "Properties", icon: Building2 },
   { path: "/expenses", label: "Expenses", icon: Receipt },
   { path: "/invoices", label: "Invoices", icon: FileText },
   { path: "/documents", label: "Documents", icon: FolderOpen },
-  { path: "/event", label: " Up Coming Events", icon: Calendar },
-  { path: "/activity", label: "Activity Log", icon: Activity },
   // { path: "/analytics", label: "Analytics", icon: BarChart2 },
   { path: "/ideas", label: "Ideas & Tickets", icon: Lightbulb },
   { path: "/notepad", label: "Notepad", icon: NotebookPen },
   { path: "/employees", label: "Employees", icon: UserSquare2 },
-  { path: "/passwords", label: "Passwords", icon: KeyRound },
   // { path: "/chat", label: "Chat", icon: MessageSquare },
-  { path: "/hpc", label: "HPC", icon: TargetIcon },
   { path: "/business-plan", label: "Business Plan", icon: BookMarked },
-  { path: "/stepper", label: "Stepper", icon: ListOrdered },
   // { path: "/aichat", label: "AI Chat", icon: MessageSquare },
 
 ];

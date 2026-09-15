@@ -16,7 +16,6 @@ import { Command } from "cmdk";
 const tabs = [
   { id: "overview", label: "Overview" },
   { id: "financials", label: "Financials" },
-  { id: "hpc", label: "HPC" },
   { id: "notes", label: "My Notes" },
   { id: "documents", label: "Documents" },
   { id: "chat", label: "Chats" },
