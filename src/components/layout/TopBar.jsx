@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, Command, Menu, Sun, Moon, LogOut } from 'lucide-react';
+import { Search, Bell, Command, Menu, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { api } from '@/api/apiClient';
 import { formatDistanceToNow } from 'date-fns';
-import LogoutConfirmDialog from '@/components/auth/LogoutConfirmDialog';
 
 const STORAGE_KEY = 'notif_read_ids';
 
@@ -17,7 +16,6 @@ function getStoredReadIds() {
 export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, onMenuToggle, currentUser }) {
   const [activities, setActivities] = useState([]);
   const [readIds, setReadIds] = useState(getStoredReadIds);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     if (!currentUser?.email) return;
@@ -41,11 +39,6 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
     const newSet = new Set(activities.map(a => a.id));
     setReadIds(newSet);
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...newSet]));
-  };
-
-  const handleLogout = () => {
-    api.auth.logout();
-    api.auth.redirectToLogin();
   };
 
   return (
@@ -125,21 +118,7 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
             </ScrollArea>
           </PopoverContent>
         </Popover>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowLogoutConfirm(true)}
-          title="Log out"
-        >
-          <LogOut className="w-[18px] h-[18px]" />
-        </Button>
       </div>
-
-      <LogoutConfirmDialog
-        open={showLogoutConfirm}
-        onOpenChange={setShowLogoutConfirm}
-        onConfirm={handleLogout}
-      />
     </header>
   );
 }

@@ -237,6 +237,8 @@ export default function Documents() {
 
       if (editDoc) updateDoc.mutate({ id: editDoc.id, data: payload });
       else createDoc.mutate(payload);
+    } catch (error) {
+      toast.error(error.message || 'File upload failed');
     } finally {
       setUploading(false);
     }
@@ -250,7 +252,11 @@ export default function Documents() {
         to: emailForm.to,
         subject: emailForm.subject,
         body: emailForm.body,
-        file_url: emailDialog?.file_url ? `${window.location.origin}${emailDialog.file_url}` : '',
+        file_url: emailDialog?.file_url
+          ? (emailDialog.file_url.startsWith('http')
+            ? emailDialog.file_url
+            : `${window.location.origin}${emailDialog.file_url}`)
+          : '',
         file_name: emailDialog?.title,
       });
       toast.success('Email sent successfully');

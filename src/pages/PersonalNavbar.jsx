@@ -6,7 +6,6 @@ import {
   Sun,
   Moon,
   ChevronDown,
-  LogOut,
   Menu,
   X,
 } from "lucide-react";
@@ -66,13 +65,6 @@ export default function PersonalNavbar(
       "theme",
       dark ? "dark" : "light"
     );
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-
-    window.location.href = "/login";
   };
 
   return (
@@ -259,19 +251,6 @@ export default function PersonalNavbar(
                     </div>
                   </div>
 
-                  <button
-                    onClick={handleLogout}
-                    className="
-                      w-full
-                      flex items-center gap-3
-                      px-4 py-3
-                      text-red-600
-                      hover:bg-red-50
-                    "
-                  >
-                    <LogOut size={18} />
-                    Logout
-                  </button>
                 </motion.div>
               )}
             </AnimatePresence>

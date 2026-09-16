@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -43,6 +43,17 @@ export default function Properties() {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [photoFiles, setPhotoFiles] = useState([]);
+  const [photoPreviews, setPhotoPreviews] = useState([]);
+
+  useEffect(() => {
+    const previews = photoFiles.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    setPhotoPreviews(previews);
+    return () => previews.forEach(({ url }) => URL.revokeObjectURL(url));
+  }, [photoFiles]);
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ['properties', companyId],
@@ -72,12 +83,14 @@ export default function Properties() {
     setDialogOpen(false);
     setEditing(null);
     setForm(EMPTY_FORM);
+    setPhotoFiles([]);
+    setPhotoPreviews([]);
   };
 
   const saveMutation = useMutation({
-    mutationFn: (data) => editing
-      ? api.entities.Property.update(propertyId(editing), data)
-      : api.entities.Property.create({ ...data, company_id: companyId }),
+    mutationFn: (formData) => editing
+      ? api.entities.Property.updateMultipart(propertyId(editing), formData)
+      : api.entities.Property.createMultipart(formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['properties', companyId] });
       toast.success(editing ? 'Property updated' : 'Property added');
@@ -99,6 +112,8 @@ export default function Properties() {
   const openAdd = () => {
     setEditing(null);
     setForm(EMPTY_FORM);
+    setPhotoFiles([]);
+    setPhotoPreviews([]);
     setDialogOpen(true);
   };
 
@@ -117,23 +132,21 @@ export default function Properties() {
       description: property.description || '',
       photos: property.photos || [],
     });
+    setPhotoFiles([]);
+    setPhotoPreviews([]);
     setDialogOpen(true);
   };
 
   const uploadPhotos = async (event) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
-    setUploading(true);
-    try {
-      const uploaded = await Promise.all(files.map((file) => api.integrations.Core.UploadFile({ file })));
-      setForm((current) => ({ ...current, photos: [...current.photos, ...uploaded.map((file) => file.file_url)] }));
-      toast.success(`${files.length} photo${files.length > 1 ? 's' : ''} uploaded`);
-    } catch (error) {
-      toast.error(error.message || 'Photo upload failed');
-    } finally {
-      setUploading(false);
-      event.target.value = '';
+    const remainingSlots = 10 - form.photos.length - photoFiles.length;
+    if (files.length > remainingSlots) {
+      toast.error(`You can upload up to 10 photos per property`);
+      return;
     }
+    setPhotoFiles((current) => [...current, ...files]);
+    event.target.value = '';
   };
 
   const handleSubmit = (event) => {
@@ -146,13 +159,22 @@ export default function Properties() {
       toast.error('Enter a valid price');
       return;
     }
-    saveMutation.mutate({
+    const formData = new FormData();
+    const propertyData = {
       ...form,
+      company_id: companyId,
       price: Number(form.price),
       bedrooms: Number(form.bedrooms) || 0,
       bathrooms: Number(form.bathrooms) || 0,
       area: Number(form.area) || 0,
+    };
+    Object.entries(propertyData).forEach(([key, value]) => {
+      if (key !== 'photos') formData.append(key, String(value ?? ''));
     });
+    formData.append('existing_photos', JSON.stringify(form.photos));
+    photoFiles.forEach((file) => formData.append('photos', file));
+    setUploading(true);
+    saveMutation.mutate(formData, { onSettled: () => setUploading(false) });
   };
 
   return (
@@ -247,7 +269,7 @@ export default function Properties() {
               </section>
               <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
                 <div className="mb-4 flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-950 text-xs font-semibold text-white">03</span><div><h3 className="text-sm font-semibold">Story & media</h3><p className="text-xs text-muted-foreground">Add context and make the listing memorable.</p></div></div>
-                <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor="property-description" className="text-xs font-semibold">Description</Label><Textarea id="property-description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What makes this property worth viewing?" className="min-h-24 resize-none bg-background" /></div><div className="space-y-2"><Label className="text-xs font-semibold">Photos</Label><label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-input bg-muted/30 px-3 py-6 text-sm transition-colors hover:border-amber-400 hover:bg-amber-50/50"><UploadCloud className="h-5 w-5 text-muted-foreground" />{uploading ? 'Uploading...' : 'Drop photos here or browse'}<span className="text-xs text-muted-foreground">JPG, PNG up to your upload limit</span><input type="file" accept="image/*" multiple className="hidden" onChange={uploadPhotos} disabled={uploading} /></label>{form.photos.length > 0 && <div className="grid grid-cols-4 gap-2">{form.photos.map((photo, index) => <div key={`${photo}-${index}`} className="group relative aspect-square overflow-hidden rounded-lg"><img src={photoUrl(photo)} alt={`Property ${index + 1}`} className="h-full w-full object-cover" /><button type="button" onClick={() => setForm({ ...form, photos: form.photos.filter((_, photoIndex) => photoIndex !== index) })} className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100" aria-label="Remove photo"><X className="h-3 w-3" /></button></div>)}</div>}</div></div>
+                <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor="property-description" className="text-xs font-semibold">Description</Label><Textarea id="property-description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What makes this property worth viewing?" className="min-h-24 resize-none bg-background" /></div><div className="space-y-2"><div className="flex items-center justify-between"><Label className="text-xs font-semibold">Photos</Label><span className="text-xs text-muted-foreground">{form.photos.length + photoFiles.length}/10 selected</span></div><label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-input bg-muted/30 px-3 py-6 text-sm transition-colors hover:border-amber-400 hover:bg-amber-50/50"><UploadCloud className="h-5 w-5 text-muted-foreground" />{uploading ? 'Saving photos...' : 'Drop photos here or browse'}<span className="text-xs text-muted-foreground">JPG, PNG, WEBP · up to 10 photos</span><input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple className="hidden" onChange={uploadPhotos} disabled={uploading || form.photos.length + photoFiles.length >= 10} /></label>{(form.photos.length > 0 || photoFiles.length > 0) && <div className="grid grid-cols-4 gap-2">{form.photos.map((photo, index) => <div key={`${photo}-${index}`} className="group relative aspect-square overflow-hidden rounded-lg"><img src={photoUrl(photo)} alt={`Property ${index + 1}`} className="h-full w-full object-cover" /><button type="button" onClick={() => setForm({ ...form, photos: form.photos.filter((_, photoIndex) => photoIndex !== index) })} className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100" aria-label="Remove photo"><X className="h-3 w-3" /></button></div>)}{photoPreviews.map(({ file, url }, index) => <div key={`${file.name}-${file.lastModified}`} className="group relative aspect-square overflow-hidden rounded-lg"><img src={url} alt={file.name} className="h-full w-full object-cover" /><button type="button" onClick={() => setPhotoFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))} className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100" aria-label="Remove photo"><X className="h-3 w-3" /></button></div>)}</div>}</div></div>
               </section>
             </div>
             <DialogFooter className="shrink-0 border-t border-border bg-card px-5 py-4 sm:px-7"><Button type="button" variant="outline" onClick={closeDialog}>Cancel</Button><Button type="submit" disabled={saveMutation.isPending || uploading} className="bg-slate-950 text-white hover:bg-slate-800">{saveMutation.isPending ? 'Saving...' : editing ? 'Update property' : 'Create property'}</Button></DialogFooter>

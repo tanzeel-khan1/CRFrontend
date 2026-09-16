@@ -36,6 +36,21 @@ const request = async (method, path, body) => {
   return normalizeResult(data);
 };
 
+const requestMultipart = async (method, path, formData) => {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    const error = new Error(err.message || 'Request failed');
+    error.status = res.status;
+    throw error;
+  }
+  return normalizeResult(await res.json());
+};
+
 const uploadFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
@@ -44,7 +59,13 @@ const uploadFile = async (file) => {
     headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
     body: formData,
   });
-  if (!res.ok) throw new Error('Upload failed');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    console.error('Upload request failed:', res.status, errorData);
+    const error = new Error(errorData.message || `Upload failed (${res.status})`);
+    error.status = res.status;
+    throw error;
+  }
   return res.json();
 };
 
@@ -63,6 +84,8 @@ const entity = (resource) => ({
   },
   create: (data) => request('POST', `/api/${resource}`, data),
   update: (id, data) => request('PUT', `/api/${resource}/${id}`, data),
+  createMultipart: (formData) => requestMultipart('POST', `/api/${resource}`, formData),
+  updateMultipart: (id, formData) => requestMultipart('PUT', `/api/${resource}/${id}`, formData),
   delete: (id) => request('DELETE', `/api/${resource}/${id}`),
   subscribe: (cb) => {
     let active = true;
