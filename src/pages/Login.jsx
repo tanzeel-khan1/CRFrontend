@@ -136,7 +136,7 @@ export default function Login() {
                   <span className="text-sm font-bold">T</span>
                 </div>
                 <span className="text-2xl font-bold tracking-tight">
-                  Tynvora OS
+                  TBuilds OS
                 </span>
               </div>
 
@@ -164,7 +164,7 @@ Run your business with confidence.
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                     <span className="text-xs font-bold">T</span>
                   </div>
-                  <span className="text-xl font-bold">Tynvora OS</span>
+                  <span className="text-xl font-bold">TBuilds OS</span>
                 </div>
               </div>
 

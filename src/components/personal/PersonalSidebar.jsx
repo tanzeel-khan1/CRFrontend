@@ -2,18 +2,15 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
-  StickyNote,
   Building2,
   LogOut,
   Home,
   TrendingUp,
   FolderOpen,
-  MessageSquare,
   Menu,
   X,
   ChevronDown,
   Plus,
-  TargetIcon,
 } from "lucide-react";
 import { api } from "@/api/apiClient";
 import LogoutConfirmDialog from "@/components/auth/LogoutConfirmDialog";
@@ -29,10 +26,7 @@ const navItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "financials", label: "Financials", icon: TrendingUp },
   { id: "companies", label: "Companies", icon: Building2 },
-  { id: "notes", label: "My Notes", icon: StickyNote },
   { id: "documents", label: "Documents", icon: FolderOpen },
-  { id: "chat", label: "Chats", icon: MessageSquare },
-    { id: "goals", label: "Goals", icon: TargetIcon },
   { id: "profile", label: "Profile", icon: LayoutDashboard },
 
 ];
@@ -161,7 +155,7 @@ export default function PersonalSidebar({
               <span className="text-black font-bold text-xs">T</span>
             </div>
             <span className="font-semibold text-sm tracking-tight text-sidebar-foreground">
-              Tynvora OS
+              TBuilds OS
             </span>
           </div>
         </div>
@@ -240,7 +234,7 @@ export default function PersonalSidebar({
             <span className="text-black font-bold text-xs">T</span>
           </div>
           <span className="font-semibold text-sm tracking-tight">
-            Tynvora OS
+            TBuilds OS
           </span>
         </div>
         <div className="w-9 h-9 rounded-full bg-sidebar-primary/20 flex items-center justify-center">
@@ -273,7 +267,7 @@ export default function PersonalSidebar({
               <span className="text-black font-bold text-xs">T</span>
             </div>
             <span className="font-semibold text-sm tracking-tight">
-              Tynvora OS
+              TBuilds OS
             </span>
           </div>
           <button

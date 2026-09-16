@@ -43,7 +43,7 @@ const AuthenticatedApp = () => {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-[10px] leading-none tracking-wide">TY</span>
             </div>
-            <span className="text-[11px] font-semibold text-foreground/70">Tynvora OS</span>
+            <span className="text-[11px] font-semibold text-foreground/70">TBuilds OS</span>
           </div>
           <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin"></div>
         </div>

@@ -113,25 +113,21 @@ export default function Invoices() {
     if (!emailTo.trim()) return;
     setSendingEmail(true);
     const inv = emailTarget;
-    const body = `Dear ${inv.recipient_name || 'Sir/Madam'},
-
-Please find your invoice details below:
-
-Invoice Title  : ${inv.title}
-Invoice No     : ${inv.invoice_number || 'N/A'}
-Amount         : $${(inv.amount || 0).toLocaleString()}
-Tax            : $${(inv.tax_amount || 0).toLocaleString()}
-Total Amount   : $${(inv.total_amount || inv.amount || 0).toLocaleString()}
-Due Date       : ${inv.due_date ? format(new Date(inv.due_date), 'MMMM d, yyyy') : 'N/A'}
-Status         : ${inv.status}${inv.notes ? `\n\nNotes: ${inv.notes}` : ''}
-
-Thank you for your business.`;
-
     try {
       await api.integrations.Core.SendEmail({
         to: emailTo.trim(),
         subject: `Invoice ${inv.invoice_number || ''} - ${inv.title}`,
-        body,
+        invoice: {
+          recipient_name: inv.recipient_name || 'Sir/Madam',
+          title: inv.title,
+          invoice_number: inv.invoice_number || 'N/A',
+          amount: inv.amount || 0,
+          tax_amount: inv.tax_amount || 0,
+          total_amount: inv.total_amount || inv.amount || 0,
+          due_date: inv.due_date || '',
+          status: inv.status || 'draft',
+          notes: inv.notes || '',
+        },
       });
       toast.success(`Email successfully sent to ${emailTo}!`);
       // Also mark invoice as 'sent' if it was draft
@@ -223,21 +219,23 @@ Thank you for your business.`;
 
       {/* Send Email Dialog */}
       <Dialog open={emailDialog} onOpenChange={setEmailDialog}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Send Invoice via Email</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Invoice <strong>{emailTarget?.invoice_number}</strong> — <strong>{emailTarget?.title}</strong></p>
-            <div>
-              <Label>Send to Email</Label>
-              <Input value={emailTo} onChange={e => setEmailTo(e.target.value)} placeholder="recipient@example.com" type="email" />
-            </div>
+        <DialogContent className="max-w-xl overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
+          <div className="bg-slate-950 px-6 py-6 text-white sm:px-7">
+            <DialogHeader>
+              <div className="flex items-start gap-3 pr-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-300 text-slate-950"><Mail className="h-5 w-5" /></div>
+                <div><DialogTitle className="text-xl text-white">Send invoice</DialogTitle><p className="mt-1 text-sm text-slate-300">Deliver a clean invoice summary to your client.</p></div>
+              </div>
+            </DialogHeader>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEmailDialog(false)}>Cancel</Button>
-            <Button onClick={sendInvoiceEmail} disabled={!emailTo.trim() || sendingEmail} className="gap-2">
-              <Mail className="w-4 h-4" />{sendingEmail ? 'Sending...' : 'Send Email'}
-            </Button>
-          </DialogFooter>
+          <div className="space-y-5 bg-muted/30 p-6 sm:p-7">
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-4 border-b border-border pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Invoice preview</p><p className="mt-2 text-lg font-semibold">{emailTarget?.title}</p><p className="mt-1 text-xs text-muted-foreground">{emailTarget?.invoice_number || 'Invoice'}</p></div><div className="text-right"><p className="text-2xl font-bold tracking-tight">${Number(emailTarget?.total_amount || emailTarget?.amount || 0).toLocaleString()}</p><Badge className="mt-2 capitalize">{emailTarget?.status || 'draft'}</Badge></div></div>
+              <div className="grid grid-cols-2 gap-4 pt-4 text-sm"><div><p className="text-xs text-muted-foreground">Recipient</p><p className="mt-1 font-medium">{emailTarget?.recipient_name || 'Client'}</p></div><div className="text-right"><p className="text-xs text-muted-foreground">Due date</p><p className="mt-1 font-medium">{emailTarget?.due_date ? format(new Date(emailTarget.due_date), 'MMM d, yyyy') : 'Not set'}</p></div></div>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm"><div className="space-y-2"><Label htmlFor="invoice-email" className="text-xs font-semibold">Recipient email</Label><Input id="invoice-email" value={emailTo} onChange={e => setEmailTo(e.target.value)} placeholder="recipient@example.com" type="email" className="h-11 bg-background" /><p className="text-xs text-muted-foreground">The recipient will receive the invoice details and due date.</p></div></div>
+          </div>
+          <DialogFooter className="border-t border-border bg-card px-6 py-4 sm:px-7"><Button variant="outline" onClick={() => setEmailDialog(false)}>Cancel</Button><Button onClick={sendInvoiceEmail} disabled={!emailTo.trim() || sendingEmail} className="gap-2 bg-slate-950 text-white hover:bg-slate-800"><Mail className="h-4 w-4" />{sendingEmail ? 'Sending...' : 'Send invoice'}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 

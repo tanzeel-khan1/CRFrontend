@@ -32,12 +32,18 @@ export default function AppLayout() {
     api.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  const { data: companies = [] } = useQuery({
+  const { data: companies = [], isLoading: companiesLoading } = useQuery({
     queryKey: ['companies', currentUser?.email],
     queryFn: () => api.entities.Company.list('-created_date'),
     enabled: !!currentUser,
     initialData: [],
   });
+
+  useEffect(() => {
+    if (!companiesLoading && currentUser && companies.length === 0) {
+      navigate('/personal', { replace: true });
+    }
+  }, [companies, companiesLoading, currentUser, navigate]);
 
   // const { data: pendingInvitations = [] } = useQuery({
   //   queryKey: ['invitations', 'pending', currentUser?.email],

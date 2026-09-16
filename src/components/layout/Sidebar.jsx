@@ -66,7 +66,7 @@ export default function Sidebar({
           </div>
           {!collapsed && (
             <span className="font-semibold text-sm tracking-tight whitespace-nowrap text-sidebar-foreground">
-             Tynvora OS
+             TBuilds OS
             </span>
           )}
         </div>

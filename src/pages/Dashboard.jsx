@@ -54,12 +54,6 @@ export default function Dashboard() {
     initialData: [],
   });
 
-  const { data: investors = [] } = useQuery({
-    queryKey: ['investors-count', companyId],
-    queryFn: () => companyId ? api.entities.Investor.filter({ company_id: companyId }) : [],
-    initialData: [],
-  });
-
   const isLoading = expLoading || invLoading;
 
   const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -125,7 +119,6 @@ export default function Dashboard() {
       ['Total Revenue', `$${yearRevenue.toLocaleString()}`],
       ['Total Expenses', `$${yearExpenses.toLocaleString()}`],
       ['Net Profit / Loss', `$${yearProfit.toLocaleString()}`],
-      ['Total Investors', investors.length.toString()],
     ];
 
     summaryRows.forEach(([label, value], i) => {
@@ -197,57 +190,58 @@ export default function Dashboard() {
 
   const metricCards = [
     { label: 'Monthly Revenue', value: `$${(totalRevenue / 12).toLocaleString(undefined, { maximumFractionDigits: 0 })}`, change: 6.1, positive: true },
-    { label: 'Total Investors', value: investors.length.toLocaleString(), change: 19.2, positive: true },
     { label: 'Net Profit', value: `$${netProfit.toLocaleString()}`, change: netProfit >= 0 ? 8.4 : -4.2, positive: netProfit >= 0 },
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 pb-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">
-            {activeCompany ? `${activeCompany.name} Dashboard` : 'Tynvora OS Dashboard'}
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-600">Executive overview</p>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {activeCompany ? `${activeCompany.name} Dashboard` : 'TBuilds OS Dashboard'}
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Overview of your financial performance</p>
+          <p className="mt-1 text-sm text-muted-foreground">A clear view of your financial performance.</p>
         </div>
-        <Button onClick={downloadFinancialStatement} disabled={downloading || !activeCompany} size="sm" className="gap-2 text-xs">
+        <Button onClick={downloadFinancialStatement} disabled={downloading || !activeCompany} size="sm" className="h-10 gap-2 bg-slate-950 px-4 text-xs text-white shadow-lg shadow-slate-950/10 hover:bg-slate-800">
           <Download className="w-3.5 h-3.5" />
           {downloading ? 'Generating...' : `Download ${currentYear} Statement`}
         </Button>
       </div>
 
       {/* Welcome + Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {/* Welcome card */}
-        <div className="bg-card border border-border rounded-xl p-5 relative overflow-hidden">
-          <p className="text-xs text-muted-foreground">Welcome back</p>
-          <h2 className="text-sm font-bold mt-1 truncate">
+        <div className="relative overflow-hidden rounded-2xl bg-slate-950 p-5 text-white shadow-xl">
+          <div className="relative z-10"><p className="text-xs text-slate-400">Welcome back</p>
+          <h2 className="mt-1 truncate text-lg font-semibold">
             {activeCompany?.name || 'Your Company'}
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">Best performer this month</p>
+          <p className="mt-1 text-xs text-slate-400">Best performer this month</p>
           <div className="mt-4">
-            <p className="text-2xl font-bold">${totalExpenses.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-              <ArrowUpRight className="w-3 h-3" /> +12% from last month
+            <p className="text-3xl font-semibold tracking-tight">${totalExpenses.toLocaleString()}</p>
+            <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
+              <ArrowUpRight className="h-3 w-3 text-amber-300" /> +12% from last month
             </p>
           </div>
-          <Button size="sm" variant="outline" className="mt-4 text-xs w-full" onClick={() => navigate('/invoices')}>
+          <Button size="sm" variant="outline" className="mt-4 w-full border-white/15 bg-white/5 text-xs text-white hover:bg-white/10 hover:text-white" onClick={() => navigate('/invoices')}>
             View Invoices
           </Button>
+          </div><div className="absolute -bottom-12 -right-10 h-36 w-36 rounded-full border-[18px] border-amber-300/10" />
         </div>
 
         {/* Metric cards */}
         {metricCards.map((m, i) => (
-          <div key={i} className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between">
+          <div key={i} className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">{m.label}</p>
-              <span className={`text-xs font-semibold flex items-center gap-0.5 ${m.positive ? 'text-foreground' : 'text-destructive'}`}>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{m.label}</p>
+              <span className={`flex items-center gap-0.5 rounded-full px-2 py-1 text-xs font-semibold ${m.positive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
                 {m.positive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                 {m.positive ? '+' : ''}{m.change}%
               </span>
             </div>
-            <p className="text-2xl font-bold mt-3">{m.value}</p>
+            <p className="text-3xl font-semibold tracking-tight">{m.value}</p>
             
           </div>
         ))}
@@ -256,20 +250,20 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Bar Chart - Total Revenue */}
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-start justify-between mb-1">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="mb-3 flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-semibold">Total Revenue</h3>
-              <p className="text-xs text-muted-foreground">Income in the last 12 months</p>
+              <h3 className="text-base font-semibold">Total Revenue</h3>
+              <p className="mt-1 text-xs text-muted-foreground">Income in the last 12 months</p>
             </div>
-            <div className="flex gap-4 text-xs">
+            <div className="flex gap-5 text-right text-xs">
               <div>
-                <p className="text-muted-foreground uppercase tracking-wide">Revenue</p>
-                <p className="font-bold text-sm">${totalRevenue.toLocaleString()}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Revenue</p>
+                <p className="mt-1 text-sm font-semibold">${totalRevenue.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-muted-foreground uppercase tracking-wide">Expenses</p>
-                <p className="font-bold text-sm">${totalExpenses.toLocaleString()}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Expenses</p>
+                <p className="mt-1 text-sm font-semibold">${totalExpenses.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -285,18 +279,18 @@ export default function Dashboard() {
         </div>
 
         {/* Line Chart - Returning Rate */}
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-start justify-between mb-1">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="mb-3 flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-semibold">Profit Trend</h3>
+              <h3 className="text-base font-semibold">Profit Trend</h3>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-2xl font-bold">${totalPaid.toLocaleString()}</p>
+                <p className="text-3xl font-semibold tracking-tight">${totalPaid.toLocaleString()}</p>
                 <span className="text-xs text-muted-foreground font-semibold flex items-center gap-0.5">
                   <ArrowUpRight className="w-3 h-3" /> +2.5%
                 </span>
               </div>
             </div>
-            <Button size="sm" variant="outline" className="text-xs gap-1">
+            <Button size="sm" variant="outline" className="gap-1 text-xs">
               <TrendingUp className="w-3.5 h-3.5" /> Export
             </Button>
           </div>
@@ -313,9 +307,9 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Invoices */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold">Recent Invoices</h3>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Activity</p><h3 className="mt-1 text-base font-semibold">Recent Invoices</h3></div>
           <button onClick={() => navigate('/invoices')} className="text-xs text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors">
             View all <ChevronRight className="w-3 h-3" />
           </button>
@@ -328,7 +322,7 @@ export default function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-muted-foreground border-b border-border">
+                <tr className="border-b border-border text-xs text-muted-foreground">
                   <th className="text-left pb-2 font-medium">Title</th>
                   <th className="text-left pb-2 font-medium hidden sm:table-cell">Recipient</th>
                   <th className="text-right pb-2 font-medium">Amount</th>
@@ -337,7 +331,7 @@ export default function Dashboard() {
               </thead>
               <tbody className="divide-y divide-border">
                 {invoices.slice(0, 5).map(inv => (
-                  <tr key={inv.id} className="text-sm">
+                  <tr key={inv.id} className="text-sm transition-colors hover:bg-muted/30">
                     <td className="py-2.5 font-medium">{inv.title}</td>
                     <td className="py-2.5 text-muted-foreground hidden sm:table-cell">{inv.recipient_name || '—'}</td>
                     <td className="py-2.5 text-right font-semibold">${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
