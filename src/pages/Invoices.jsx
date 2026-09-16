@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -39,7 +38,7 @@ export default function Invoices() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [tab, setTab] = useState('all');
-  const [form, setForm] = useState({ title: '', amount: 0, tax_amount: 0, recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft', type: 'external' });
+  const [form, setForm] = useState({ title: '', amount: 0, tax_amount: 0, recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft' });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [emailDialog, setEmailDialog] = useState(false);
   const [emailTarget, setEmailTarget] = useState(null);
@@ -88,11 +87,11 @@ export default function Invoices() {
     },
   });
 
-  const closeDialog = () => { setDialogOpen(false); setEditing(null); setForm({ title: '', amount: 0, tax_amount: 0, recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft', type: 'external' }); };
+  const closeDialog = () => { setDialogOpen(false); setEditing(null); setForm({ title: '', amount: 0, tax_amount: 0, recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft' }); };
 
   const openEdit = (inv) => {
     setEditing(inv);
-    setForm({ title: inv.title, amount: inv.amount, tax_amount: inv.tax_amount || 0, recipient_name: inv.recipient_name || '', recipient_email: inv.recipient_email || '', due_date: inv.due_date || '', notes: inv.notes || '', status: inv.status, type: inv.type || 'external' });
+    setForm({ title: inv.title, amount: inv.amount, tax_amount: inv.tax_amount || 0, recipient_name: inv.recipient_name || '', recipient_email: inv.recipient_email || '', due_date: inv.due_date || '', notes: inv.notes || '', status: inv.status });
     setDialogOpen(true);
   };
 
@@ -252,16 +251,6 @@ export default function Invoices() {
               <div><Label>Amount ($)</Label><Input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></div>
               <div><Label>Tax ($)</Label><Input type="number" value={form.tax_amount} onChange={e => setForm({ ...form, tax_amount: Number(e.target.value) })} /></div>
               <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} /></div>
-            </div>
-            <div><Label>Type</Label>
-              <Select value={form.type} onValueChange={v => setForm({ ...form, type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="external">External</SelectItem>
-                  <SelectItem value="company_to_investor">Company → Investor</SelectItem>
-                  <SelectItem value="investor_to_company">Investor → Company</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
           </div>
