@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 const CATEGORIES = ['legal', 'finance', 'contracts', 'hr', 'investments', 'tax', 'personal'];
 
@@ -224,7 +225,24 @@ export default function PersonalDocuments({ currentUser }) {
                 <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>File</Label><Input type="file" onChange={e => setFile(e.target.files?.[0] || null)} /></div>
+            <div>
+              <Label>File</Label>
+              <Input
+                type="file"
+                accept="image/*,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip"
+                onChange={e => {
+                  const selectedFile = e.target.files?.[0];
+                  if (selectedFile?.type === 'application/pdf' || selectedFile?.name.toLowerCase().endsWith('.pdf')) {
+                    e.target.value = '';
+                    setFile(null);
+                    toast.info('PDF uploads are temporarily unavailable. Please try again later.');
+                    return;
+                  }
+                  setFile(selectedFile || null);
+                }}
+              />
+              <p className="text-xs text-muted-foreground mt-1">PDF uploads are temporarily unavailable.</p>
+            </div>
           </div>
           <DialogFooter><Button onClick={handleUpload} disabled={uploading || !form.title}>{uploading ? 'Uploading...' : 'Upload'}</Button></DialogFooter>
         </DialogContent>
@@ -252,7 +270,7 @@ function DocCard({ doc, i, onDelete }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 h-7 w-7"><MoreVertical className="w-3.5 h-3.5" /></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {doc.file_url && <DropdownMenuItem onClick={() => window.open(doc.file_url, '_blank')}><Download className="w-4 h-4 mr-2" />Download</DropdownMenuItem>}
+            {doc.file_url && <DropdownMenuItem className="cursor-pointer" onClick={() => window.open(doc.file_url, '_blank')}><Download className="w-4 h-4 mr-2" />Download</DropdownMenuItem>}
             <DropdownMenuItem className="text-destructive" onClick={onDelete}><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

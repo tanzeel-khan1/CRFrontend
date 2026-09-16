@@ -53,6 +53,17 @@ const CATEGORY_COLORS = {
   other: 'bg-muted text-muted-foreground',
 };
 
+const getFilePreviewType = (document) => {
+  const mimeType = document?.file_type || '';
+  const extension = document?.file_url?.split('?')[0].split('.').pop()?.toLowerCase();
+
+  if (mimeType.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) return 'image';
+  if (mimeType === 'application/pdf' || extension === 'pdf') return 'pdf';
+  if (mimeType.startsWith('video/')) return 'video';
+  if (mimeType.startsWith('audio/')) return 'audio';
+  return null;
+};
+
 function getFileIcon(fileType) {
   if (!fileType) return FileText;
   if (fileType.includes('pdf')) return FileText;
@@ -204,12 +215,14 @@ export default function Documents() {
     setUploading(true);
     try {
       let file_url = editDoc?.file_url || '';
+      let cloudinary_public_id = editDoc?.cloudinary_public_id || '';
       let file_type = editDoc?.file_type || '';
       let file_size = editDoc?.file_size || 0;
 
       if (file) {
         const result = await api.integrations.Core.UploadFile({ file });
         file_url = result.file_url;
+        cloudinary_public_id = result.cloudinary_public_id || '';
         file_type = file.type;
         file_size = file.size;
       }
@@ -218,6 +231,7 @@ export default function Documents() {
         ...form,
         company_id: companyId,
         file_url,
+        cloudinary_public_id,
         file_type,
         file_size,
       };
@@ -511,7 +525,22 @@ export default function Documents() {
             {docMode === 'upload' ? (
               <div>
                 <Label>File {editDoc?.file_url ? '(leave blank to keep existing)' : ''}</Label>
-                <Input type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="cursor-pointer" />
+                <Input
+                  type="file"
+                  accept="image/*,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip"
+                  onChange={e => {
+                    const selectedFile = e.target.files?.[0];
+                    if (selectedFile?.type === 'application/pdf' || selectedFile?.name.toLowerCase().endsWith('.pdf')) {
+                      e.target.value = '';
+                      setFile(null);
+                      toast.info('PDF uploads are temporarily unavailable. Please try again later.');
+                      return;
+                    }
+                    setFile(selectedFile || null);
+                  }}
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-muted-foreground mt-1">PDF uploads are temporarily unavailable.</p>
                 {editDoc?.file_url && !file && (
                   <p className="text-xs text-muted-foreground mt-1">Current file will be kept.</p>
                 )}
@@ -591,13 +620,22 @@ export default function Documents() {
             {viewDialog?.content ? (
               <pre className="text-sm whitespace-pre-wrap font-mono bg-muted p-4 rounded-lg leading-relaxed">{viewDialog.content}</pre>
             ) : viewDialog?.file_url ? (
-              <div className="text-center py-8">
-                <FileText className="w-10 h-10 mx-auto opacity-30 mb-3" />
-                <p className="text-sm text-muted-foreground mb-3">This is a file document.</p>
-                <Button onClick={() => window.open(viewDialog.file_url, '_blank')} className="gap-2">
-                  <Download className="w-4 h-4" /> Open / Download File
-                </Button>
-              </div>
+              getFilePreviewType(viewDialog) === 'image' ? (
+                <img src={viewDialog.file_url} alt={viewDialog.title} className="max-h-[55vh] max-w-full mx-auto rounded-lg object-contain" />
+              ) : getFilePreviewType(viewDialog) === 'pdf' ? (
+                <iframe src={viewDialog.file_url} title={viewDialog.title} className="w-full h-[55vh] rounded-lg border" />
+              ) : getFilePreviewType(viewDialog) === 'video' ? (
+                <video src={viewDialog.file_url} controls className="w-full max-h-[55vh] rounded-lg" />
+              ) : getFilePreviewType(viewDialog) === 'audio' ? (
+                <audio src={viewDialog.file_url} controls className="w-full mt-8" />
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground mb-3">This file format cannot be previewed here.</p>
+                  <Button onClick={() => window.open(viewDialog.file_url, '_blank')} className="gap-2 cursor-pointer">
+                    <Download className="w-4 h-4" /> Open / Download File
+                  </Button>
+                </div>
+              )
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">No content</p>
             )}
@@ -605,7 +643,7 @@ export default function Documents() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setViewDialog(null)}>Close</Button>
             {viewDialog?.file_url && (
-              <Button onClick={() => window.open(viewDialog.file_url, '_blank')} className="gap-2">
+              <Button onClick={() => window.open(viewDialog.file_url, '_blank')} className="gap-2 cursor-pointer">
                 <Download className="w-4 h-4" /> Download
               </Button>
             )}
@@ -652,12 +690,12 @@ function DocCard({ doc, i, onEdit, onDelete, onEmail, onView }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
             {(hasContent || hasFile) && (
-              <DropdownMenuItem onClick={onView}>
+              <DropdownMenuItem className="cursor-pointer" onClick={onView}>
                 <Eye className="w-4 h-4 mr-2" />View
               </DropdownMenuItem>
             )}
             {hasFile && (
-              <DropdownMenuItem onClick={() => window.open(doc.file_url, '_blank')}>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => window.open(doc.file_url, '_blank')}>
                 <Download className="w-4 h-4 mr-2" />Download
               </DropdownMenuItem>
             )}

@@ -135,7 +135,7 @@ export default function Invoices() {
         updateMutation.mutate({ id: inv.id, data: { status: 'sent' } });
       }
     } catch (err) {
-      toast.error('Email send nahi ho saki. Please try again.');
+      toast.error('The email could not be sent. Please try again.');
     }
     setSendingEmail(false);
     setEmailDialog(false);
