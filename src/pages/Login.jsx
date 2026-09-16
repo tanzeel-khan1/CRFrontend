@@ -103,7 +103,7 @@ export default function Login() {
       const result = await signInWithPopup(auth, provider);
 
       const response = await axios.post(
-        "https://corevia.bonto.run/api/auth/google",
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/google`,
         {
           full_name: result.user.displayName,
           email: result.user.email,

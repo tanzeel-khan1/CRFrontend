@@ -357,7 +357,7 @@ import { Input } from '@/components/ui/input';
 import ChatBox, { Avatar } from '@/components/chat/ChatBox';
 import { io } from "socket.io-client";
 
-const socket = io("https://corevia.bonto.run", {
+const socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
   auth: {
     token: localStorage.getItem("token"),
   },
