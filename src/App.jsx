@@ -5,6 +5,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate, useOutletContext } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { wakeBackend } from '@/api/apiClient';
 
 import AppLayout from './components/layout/AppLayout';
 import PersonalLayout from './components/personal/PersonalLayout';
@@ -31,6 +32,7 @@ import AIChat from './components/AIChat.jsx';
 import Verifyotp from './pages/Verifyotp.jsx';
 import Event from './pages/Event.jsx';
 import Hpc from './pages/Hpc';
+import { useEffect } from 'react';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated, authChecked } = useAuth();
@@ -43,7 +45,7 @@ const AuthenticatedApp = () => {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-[10px] leading-none tracking-wide">TY</span>
             </div>
-            <span className="text-[11px] font-semibold text-foreground/70">TBuilds OS</span>
+            <span className="text-[11px] font-semibold text-foreground/70">Tbuilds</span>
           </div>
           <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin"></div>
         </div>
@@ -95,6 +97,10 @@ if (localStorage.getItem('theme') === 'dark') {
 }
 
 function App() {
+  useEffect(() => {
+    wakeBackend();
+  }, []);
+
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>

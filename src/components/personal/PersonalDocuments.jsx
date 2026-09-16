@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/apiClient';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, MoreVertical, Trash2, Upload, FileText, FolderOpen, Shield, Download, PenTool, FolderPlus, ChevronDown, ChevronRight, Pencil } from 'lucide-react';
+import { Plus, MoreVertical, Trash2, Upload, FileText, FolderOpen, Shield, Download, FolderPlus, ChevronDown, ChevronRight, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import SignaturePad from '@/components/documents/SignaturePad';
 
 const CATEGORIES = ['legal', 'finance', 'contracts', 'hr', 'investments', 'tax', 'personal'];
 
@@ -24,7 +23,6 @@ export default function PersonalDocuments({ currentUser }) {
   const [sectionForm, setSectionForm] = useState({ name: '', description: '' });
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [signatureData, setSignatureData] = useState(null);
   const [collapsedSections, setCollapsedSections] = useState({});
 
   // Personal sections — no company_id, use created_by
@@ -68,7 +66,7 @@ export default function PersonalDocuments({ currentUser }) {
   });
 
   const closeSectionDialog = () => { setSectionDialog(false); setEditSection(null); setSectionForm({ name: '', description: '' }); };
-  const closeDocDialog = () => { setDocDialog(false); setForm({ title: '', category: 'personal', section_id: '' }); setFile(null); setSignatureData(null); };
+  const closeDocDialog = () => { setDocDialog(false); setForm({ title: '', category: 'personal', section_id: '' }); setFile(null); };
   const openNewSection = () => { setEditSection(null); setSectionForm({ name: '', description: '' }); setSectionDialog(true); };
   const openEditSection = (s) => { setEditSection(s); setSectionForm({ name: s.name, description: s.description || '' }); setSectionDialog(true); };
   const openDocDialog = (sectionId = '') => { setForm({ title: '', category: 'personal', section_id: sectionId }); setDocDialog(true); };
@@ -87,13 +85,6 @@ export default function PersonalDocuments({ currentUser }) {
       const result = await api.integrations.Core.UploadFile({ file });
       file_url = result.file_url;
     }
-    let signature_url = '';
-    if (signatureData) {
-      const blob = await fetch(signatureData).then(r => r.blob());
-      const sigFile = new File([blob], 'signature.png', { type: 'image/png' });
-      const sigResult = await api.integrations.Core.UploadFile({ file: sigFile });
-      signature_url = sigResult.file_url;
-    }
     createDocMutation.mutate({
       ...form,
       company_id: null,
@@ -101,8 +92,6 @@ export default function PersonalDocuments({ currentUser }) {
       file_url,
       file_type: file?.type || '',
       file_size: file?.size || 0,
-      signed: !!signatureData,
-      signed_by: signatureData ? [currentUser?.email || ''] : [],
     });
     setUploading(false);
   };
@@ -236,11 +225,6 @@ export default function PersonalDocuments({ currentUser }) {
               </Select>
             </div>
             <div><Label>File</Label><Input type="file" onChange={e => setFile(e.target.files?.[0] || null)} /></div>
-            <div>
-              <Label className="block mb-1.5">Signature (optional)</Label>
-              <SignaturePad onChange={setSignatureData} />
-              {signatureData && <p className="text-xs text-green-600 mt-1 flex items-center gap-1"><PenTool className="w-3 h-3" />Signature added</p>}
-            </div>
           </div>
           <DialogFooter><Button onClick={handleUpload} disabled={uploading || !form.title}>{uploading ? 'Uploading...' : 'Upload'}</Button></DialogFooter>
         </DialogContent>
@@ -275,7 +259,6 @@ function DocCard({ doc, i, onDelete }) {
       </div>
       <div className="flex items-center gap-2 mt-3 flex-wrap">
         <Badge variant="secondary" className="capitalize text-xs">{doc.category}</Badge>
-        {doc.signed && <Badge className="bg-primary/10 text-primary text-xs gap-1"><PenTool className="w-3 h-3" />Signed</Badge>}
         {doc.is_personal && <Badge className="bg-chart-4/10 text-chart-4 text-xs gap-1"><Shield className="w-3 h-3" />Personal</Badge>}
       </div>
     </motion.div>

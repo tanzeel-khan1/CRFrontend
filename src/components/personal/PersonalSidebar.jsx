@@ -155,7 +155,7 @@ export default function PersonalSidebar({
               <span className="text-black font-bold text-xs">T</span>
             </div>
             <span className="font-semibold text-sm tracking-tight text-sidebar-foreground">
-              TBuilds OS
+              Tbuilds
             </span>
           </div>
         </div>
@@ -234,7 +234,7 @@ export default function PersonalSidebar({
             <span className="text-black font-bold text-xs">T</span>
           </div>
           <span className="font-semibold text-sm tracking-tight">
-            TBuilds OS
+            Tbuilds
           </span>
         </div>
         <div className="w-9 h-9 rounded-full bg-sidebar-primary/20 flex items-center justify-center">
@@ -267,7 +267,7 @@ export default function PersonalSidebar({
               <span className="text-black font-bold text-xs">T</span>
             </div>
             <span className="font-semibold text-sm tracking-tight">
-              TBuilds OS
+              Tbuilds
             </span>
           </div>
           <button

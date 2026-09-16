@@ -1,6 +1,6 @@
-# InvestorOS Frontend
+# Tbuilds Frontend
 
-React + Vite frontend for InvestorOS.
+React + Vite frontend for Tbuilds.
 
 ## Setup
 

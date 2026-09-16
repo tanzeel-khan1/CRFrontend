@@ -6,7 +6,7 @@ import { api } from '@/api/apiClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, MoreVertical, Trash2, Upload, FileText, FolderOpen, Download,
-  PenTool, FolderPlus, ChevronDown, ChevronRight, Pencil, Mail, Eye,
+  FolderPlus, ChevronDown, ChevronRight, Pencil, Mail, Eye,
   FilePlus, X, FileEdit, Building2, DollarSign, Scale, Users, Briefcase,
   TrendingUp, Settings2, CreditCard, ShieldCheck, ShoppingCart, ClipboardCheck, MoreHorizontal,
 } from 'lucide-react';
@@ -21,7 +21,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import SignaturePad from '@/components/documents/SignaturePad';
 
 const CATEGORIES = [
   { id: 'all',        label: 'All',          icon: FolderOpen },
@@ -85,7 +84,6 @@ export default function Documents() {
   const emptyDocForm = { title: '', content: '', category: 'legal', section_id: '' };
   const [form, setForm] = useState(emptyDocForm);
   const [file, setFile] = useState(null);
-  const [signatureData, setSignatureData] = useState(null);
   const [uploading, setUploading] = useState(false);
 
   const [sectionForm, setSectionForm] = useState({ name: '', description: '' });
@@ -154,7 +152,7 @@ export default function Documents() {
   });
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
-  const closeDocDialog = () => { setDocDialog(false); setEditDoc(null); setForm(emptyDocForm); setFile(null); setSignatureData(null); };
+  const closeDocDialog = () => { setDocDialog(false); setEditDoc(null); setForm(emptyDocForm); setFile(null); };
   const closeSectionDialog = () => { setSectionDialog(false); setEditSection(null); setSectionForm({ name: '', description: '' }); };
 
   const openUpload = (sectionId = '') => {
@@ -216,23 +214,12 @@ export default function Documents() {
         file_size = file.size;
       }
 
-      let signature_url = editDoc?.signature_url || '';
-      if (signatureData) {
-        const blob = await fetch(signatureData).then(r => r.blob());
-        const sigFile = new File([blob], 'signature.png', { type: 'image/png' });
-        const sigResult = await api.integrations.Core.UploadFile({ file: sigFile });
-        signature_url = sigResult.file_url;
-      }
-
       const payload = {
         ...form,
         company_id: companyId,
         file_url,
         file_type,
         file_size,
-        signed: !!signatureData || editDoc?.signed,
-        signed_by: signatureData ? [currentUser?.email || ''] : (editDoc?.signed_by || []),
-        signature_url,
       };
 
       if (editDoc) updateDoc.mutate({ id: editDoc.id, data: payload });
@@ -541,15 +528,6 @@ export default function Documents() {
               </div>
             )}
 
-            <div>
-              <Label className="block mb-1.5">Signature (optional)</Label>
-              <SignaturePad onChange={setSignatureData} />
-              {(signatureData || editDoc?.signed) && (
-                <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                  <PenTool className="w-3 h-3" />{signatureData ? 'Signature added' : 'Already signed'}
-                </p>
-              )}
-            </div>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
@@ -706,11 +684,6 @@ function DocCard({ doc, i, onEdit, onDelete, onEmail, onView }) {
         <span className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full ${colorClass}`}>
           {catLabel}
         </span>
-        {doc.signed && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-500/10 text-green-600">
-            <PenTool className="w-2.5 h-2.5" />Signed
-          </span>
-        )}
         {hasFile && (
           <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
             <Download className="w-2.5 h-2.5" />File

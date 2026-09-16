@@ -200,7 +200,7 @@ export default function Dashboard() {
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-600">Executive overview</p>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {activeCompany ? `${activeCompany.name} Dashboard` : 'TBuilds OS Dashboard'}
+            {activeCompany ? `${activeCompany.name} Dashboard` : 'Tbuilds Dashboard'}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">A clear view of your financial performance.</p>
         </div>

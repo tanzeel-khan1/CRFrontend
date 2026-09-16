@@ -57,7 +57,7 @@ export default function WelcomeModal({ open, onClose, userName }) {
             </DialogTitle>
           </div>
           <DialogDescription>
-            Your account is verified. Here is a quick guide to get you started with TBuilds OS.
+            Your account is verified. Here is a quick guide to get you started with Tbuilds.
           </DialogDescription>
         </DialogHeader>
 

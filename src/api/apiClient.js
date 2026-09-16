@@ -1,5 +1,7 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const getToken = () => localStorage.getItem('token');
+const WAKE_TIMEOUT_MS = 45000;
+const RETRY_DELAY_MS = 500;
 
 
 const authHeaders = () => ({
@@ -20,12 +22,48 @@ const normalize = (doc) => {
 
 const normalizeResult = (data) => Array.isArray(data) ? data.map(normalize) : normalize(data);
 
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+export const wakeBackend = async () => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), WAKE_TIMEOUT_MS);
+
+  try {
+    await fetch(`${API_BASE}/`, { signal: controller.signal, cache: 'no-store' });
+  } catch (_) {
+    // The normal API request will show the final error if the backend stays unavailable.
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const fetchWithWakeup = async (url, options) => {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok || ![502, 503, 504].includes(res.status) || attempt === 1) return res;
+    } catch (error) {
+      if (attempt === 1) throw error;
+    }
+
+    await wakeBackend();
+    await wait(RETRY_DELAY_MS);
+  }
+};
+
 const request = async (method, path, body) => {
-  const res = await fetch(`${API_BASE}${path}`, {
+  let res;
+  try {
+    res = await fetchWithWakeup(`${API_BASE}${path}`, {
     method,
     headers: authHeaders(),
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
+  } catch (cause) {
+    const error = new Error('Server is waking up. Please try again in a moment.');
+    error.cause = cause;
+    throw error;
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     const error = new Error(err.message || 'Request failed');
@@ -37,11 +75,18 @@ const request = async (method, path, body) => {
 };
 
 const requestMultipart = async (method, path, formData) => {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
-    body: formData,
-  });
+  let res;
+  try {
+    res = await fetchWithWakeup(`${API_BASE}${path}`, {
+      method,
+      headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
+      body: formData,
+    });
+  } catch (cause) {
+    const error = new Error('Server is waking up. Please try again in a moment.');
+    error.cause = cause;
+    throw error;
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     const error = new Error(err.message || 'Request failed');
@@ -54,11 +99,18 @@ const requestMultipart = async (method, path, formData) => {
 const uploadFile = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  const res = await fetch(`${API_BASE}/api/upload`, {
-    method: 'POST',
-    headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
-    body: formData,
-  });
+  let res;
+  try {
+    res = await fetchWithWakeup(`${API_BASE}/api/upload`, {
+      method: 'POST',
+      headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
+      body: formData,
+    });
+  } catch (cause) {
+    const error = new Error('Server is waking up. Please try again in a moment.');
+    error.cause = cause;
+    throw error;
+  }
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     console.error('Upload request failed:', res.status, errorData);
