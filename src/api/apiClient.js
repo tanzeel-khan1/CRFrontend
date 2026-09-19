@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://tbuilds.bonto.run';
 const getToken = () => localStorage.getItem('token');
 const WAKE_TIMEOUT_MS = 45000;
 const RETRY_DELAY_MS = 500;
