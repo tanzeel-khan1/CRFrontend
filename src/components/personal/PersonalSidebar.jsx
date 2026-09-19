@@ -152,10 +152,10 @@ export default function PersonalSidebar({
         <div className="h-14 flex items-center px-4 border-b border-sidebar-border flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-md bg-white flex items-center justify-center flex-shrink-0">
-              <span className="text-black font-bold text-xs">T</span>
+              <span className="text-black font-bold text-xs">R</span>
             </div>
             <span className="font-semibold text-sm tracking-tight text-sidebar-foreground">
-              Tbuilds
+              Ranvola
             </span>
           </div>
         </div>
@@ -231,10 +231,10 @@ export default function PersonalSidebar({
         </button>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-white flex items-center justify-center">
-            <span className="text-black font-bold text-xs">T</span>
+            <span className="text-black font-bold text-xs">R</span>
           </div>
           <span className="font-semibold text-sm tracking-tight">
-            Tbuilds
+            Ranvola
           </span>
         </div>
         <div className="w-9 h-9 rounded-full bg-sidebar-primary/20 flex items-center justify-center">
@@ -264,10 +264,10 @@ export default function PersonalSidebar({
         <div className="h-14 flex items-center justify-between px-4 border-b border-sidebar-border flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-md bg-white flex items-center justify-center flex-shrink-0">
-              <span className="text-black font-bold text-xs">T</span>
+              <span className="text-black font-bold text-xs">R</span>
             </div>
             <span className="font-semibold text-sm tracking-tight">
-              Tbuilds
+              Ranvola
             </span>
           </div>
           <button

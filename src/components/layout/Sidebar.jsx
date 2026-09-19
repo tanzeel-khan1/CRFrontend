@@ -62,11 +62,11 @@ export default function Sidebar({
       <div className="h-14 flex items-center px-4 border-b border-sidebar-border flex-shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden w-full">
           <div className="w-7 h-7 rounded-md bg-white flex items-center justify-center flex-shrink-0">
-            <span className="text-black font-bold text-xs">T</span>
+            <span className="text-black font-bold text-xs">R</span>
           </div>
           {!collapsed && (
             <span className="font-semibold text-sm tracking-tight whitespace-nowrap text-sidebar-foreground">
-             Tbuilds
+             Ranvola
             </span>
           )}
         </div>

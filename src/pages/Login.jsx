@@ -133,10 +133,10 @@ export default function Login() {
             <div>
               <div className="mb-10 flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-foreground text-primary shadow">
-                  <span className="text-sm font-bold">T</span>
+                  <span className="text-sm font-bold">R</span>
                 </div>
                 <span className="text-2xl font-bold tracking-tight">
-                  Tbuilds
+                  Ranvola
                 </span>
               </div>
 
@@ -162,9 +162,9 @@ Run your business with confidence.
               <div className="mb-8 flex items-center justify-between lg:hidden">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                    <span className="text-xs font-bold">T</span>
+                    <span className="text-xs font-bold">R</span>
                   </div>
-                  <span className="text-xl font-bold">Tbuilds</span>
+                  <span className="text-xl font-bold">Ranvola</span>
                 </div>
               </div>
 

@@ -1,6 +1,5 @@
-# Tbuilds Frontend
-
-React + Vite frontend for Tbuilds.
+# Ranvola Frontend
+React + Vite frontend for Ranvola.
 
 ## Setup
 
