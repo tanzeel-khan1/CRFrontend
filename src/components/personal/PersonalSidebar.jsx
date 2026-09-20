@@ -11,6 +11,7 @@ import {
   X,
   ChevronDown,
   Plus,
+  Mail,
 } from "lucide-react";
 import { api } from "@/api/apiClient";
 import LogoutConfirmDialog from "@/components/auth/LogoutConfirmDialog";
@@ -216,6 +217,21 @@ export default function PersonalSidebar({
             <LogOut className="w-4 h-4" />
             <span>Log Out</span>
           </button>
+
+          <a
+            href="mailto:Contact@tanzilbuilds.xyz"
+            className="flex items-start gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors"
+          >
+            <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 text-sidebar-foreground/40" />
+            <span className="min-w-0">
+              <span className="block text-[10px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest">
+                Support
+              </span>
+              <span className="block text-xs text-sidebar-foreground/70 truncate">
+                Contact@tanzilbuilds.xyz
+              </span>
+            </span>
+          </a>
         </div>
       </aside>
 
@@ -336,6 +352,21 @@ export default function PersonalSidebar({
             <LogOut className="w-4 h-4" />
             <span>Log Out</span>
           </button>
+
+          <a
+            href="mailto:Contact@tanzilbuilds.xyz"
+            className="flex items-start gap-2.5 px-2.5 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors"
+          >
+            <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 text-sidebar-foreground/40" />
+            <span className="min-w-0">
+              <span className="block text-[10px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest">
+                Support
+              </span>
+              <span className="block text-xs text-sidebar-foreground/70 truncate">
+                Contact@tanzilbuilds.xyz
+              </span>
+            </span>
+          </a>
         </div>
       </aside>
 
