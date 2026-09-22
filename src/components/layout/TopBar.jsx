@@ -49,7 +49,7 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
       {showMenuButton && (
         <button
           onClick={onMenuToggle}
-          className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground shrink-0"
+          className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground shrink-0"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
@@ -58,16 +58,16 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
 
       <button
         onClick={onOpenCommand}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-muted/50 hover:bg-muted text-muted-foreground text-sm transition-colors flex-1 max-w-sm"
+        className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-border/70 bg-card/60 backdrop-blur hover:bg-card hover:border-foreground/20 text-muted-foreground text-sm transition-all shadow-[0_1px_2px_rgba(0,0,0,0.04)] flex-1 max-w-sm"
       >
         <Search className="w-4 h-4 shrink-0" />
         <span>Search anything...</span>
-        <kbd className="ml-auto text-xs bg-background px-1.5 py-0.5 rounded border border-border font-mono hidden sm:flex items-center gap-0.5">
+        <kbd className="ml-auto text-xs bg-muted/80 text-muted-foreground px-1.5 py-0.5 rounded-md border border-border font-mono hidden sm:flex items-center gap-0.5">
          Ctrl + K
         </kbd>
       </button>
 
-      <div className="flex items-center gap-1 ml-auto shrink-0">
+      <div className="flex items-center gap-1.5 ml-auto shrink-0">
         <Button
           variant="ghost"
           size="icon"
@@ -85,7 +85,7 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="w-[18px] h-[18px]" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-b from-[#ecbf45] to-[#c89b2a] text-background text-[10px] font-bold rounded-full flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(199,154,39,0.8)]">
                   {unreadCount}
                 </span>
               )}

@@ -196,53 +196,61 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
-      <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-600">Executive overview</p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {activeCompany ? `${activeCompany.name} Dashboard` : 'Ranvola Dashboard'}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">A clear view of your financial performance.</p>
+      <div className="card-surface relative overflow-hidden px-6 py-5 sm:px-7 sm:py-6">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#e7b63c]/[0.08] blur-2xl" />
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="eyebrow mb-2">Executive overview</p>
+            <h1 className="font-display text-[28px] font-normal tracking-tight sm:text-[34px]">
+              {activeCompany ? `${activeCompany.name} Dashboard` : 'Ranvola Dashboard'}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">A clear view of your financial performance.</p>
+          </div>
+          <Button onClick={downloadFinancialStatement} disabled={downloading || !activeCompany} size="lg" className="h-10 px-4 text-xs">
+            <Download className="w-3.5 h-3.5" />
+            {downloading ? 'Generating...' : `Download ${currentYear} Statement`}
+          </Button>
         </div>
-        <Button onClick={downloadFinancialStatement} disabled={downloading || !activeCompany} size="sm" className="h-10 gap-2 bg-slate-950 px-4 text-xs text-white shadow-lg shadow-slate-950/10 hover:bg-slate-800">
-          <Download className="w-3.5 h-3.5" />
-          {downloading ? 'Generating...' : `Download ${currentYear} Statement`}
-        </Button>
       </div>
 
       {/* Welcome + Metric Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {/* Welcome card */}
-        <div className="relative overflow-hidden rounded-2xl bg-slate-950 p-5 text-white shadow-xl">
-          <div className="relative z-10"><p className="text-xs text-slate-400">Welcome back</p>
-          <h2 className="mt-1 truncate text-lg font-semibold">
-            {activeCompany?.name || 'Your Company'}
-          </h2>
-          <p className="mt-1 text-xs text-slate-400">Best performer this month</p>
-          <div className="mt-4">
-            <p className="text-3xl font-semibold tracking-tight">${totalExpenses.toLocaleString()}</p>
-            <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
-              <ArrowUpRight className="h-3 w-3 text-amber-300" /> +12% from last month
-            </p>
+        <div className="relative overflow-hidden rounded-2xl bg-[#0c0e16] p-5 text-white shadow-[0_20px_60px_-20px_rgba(12,14,22,0.7)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(231,182,60,0.15),transparent_55%)]" />
+          <div className="pointer-events-none absolute -bottom-14 -right-10 h-40 w-40 rounded-full border-[20px] border-[#e7b63c]/10" />
+          <div className="relative z-10">
+            <p className="text-xs text-white/50">Welcome back</p>
+            <h2 className="mt-1 truncate font-display text-xl">
+              {activeCompany?.name || 'Your Company'}
+            </h2>
+            <p className="mt-1 text-xs text-white/50">Best performer this month</p>
+            <div className="mt-5">
+              <p className="text-3xl font-semibold tracking-tight">${totalExpenses.toLocaleString()}</p>
+              <p className="mt-1 flex items-center gap-1 text-xs text-white/50">
+                <ArrowUpRight className="h-3 w-3 text-[#e7b63c]" /> +12% from last month
+              </p>
+            </div>
+            <Button size="sm" variant="outline" className="mt-5 w-full border-white/15 bg-white/5 text-xs text-white hover:bg-white/10 hover:text-white" onClick={() => navigate('/invoices')}>
+              View Invoices
+            </Button>
           </div>
-          <Button size="sm" variant="outline" className="mt-4 w-full border-white/15 bg-white/5 text-xs text-white hover:bg-white/10 hover:text-white" onClick={() => navigate('/invoices')}>
-            View Invoices
-          </Button>
-          </div><div className="absolute -bottom-12 -right-10 h-36 w-36 rounded-full border-[18px] border-amber-300/10" />
         </div>
 
         {/* Metric cards */}
         {metricCards.map((m, i) => (
-          <div key={i} className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div key={i} className="card-surface flex min-h-[190px] flex-col justify-between p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(20,20,35,0.25)]">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{m.label}</p>
-              <span className={`flex items-center gap-0.5 rounded-full px-2 py-1 text-xs font-semibold ${m.positive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+              <span className={`flex items-center gap-0.5 rounded-full px-2 py-1 text-xs font-semibold ${m.positive ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 text-red-600'}`}>
                 {m.positive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                 {m.positive ? '+' : ''}{m.change}%
               </span>
             </div>
             <p className="text-3xl font-semibold tracking-tight">{m.value}</p>
-            
+            <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+              <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-[#e7b63c] to-[#c89b2a] opacity-70" />
+            </div>
           </div>
         ))}
       </div>
@@ -250,9 +258,10 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Bar Chart - Total Revenue */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="card-surface p-5">
           <div className="mb-3 flex items-start justify-between">
             <div>
+              <p className="eyebrow mb-1">Performance</p>
               <h3 className="text-base font-semibold">Total Revenue</h3>
               <p className="mt-1 text-xs text-muted-foreground">Income in the last 12 months</p>
             </div>
@@ -271,21 +280,22 @@ export default function Dashboard() {
             <BarChart data={monthlyData} barCategoryGap="30%" barGap={2}>
               <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis hide />
-              <Tooltip content={<CustomBarTooltip />} />
-              <Bar dataKey="revenue" name="Revenue" fill="hsl(var(--foreground))" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expenses" name="Expenses" fill="hsl(var(--muted-foreground) / 0.4)" radius={[3, 3, 0, 0]} />
+              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.4)' }} />
+              <Bar dataKey="revenue" name="Revenue" fill="#c89b2a" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expenses" name="Expenses" fill="hsl(var(--muted-foreground) / 0.35)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Line Chart - Returning Rate */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="card-surface p-5">
           <div className="mb-3 flex items-start justify-between">
             <div>
+              <p className="eyebrow mb-1">Trend</p>
               <h3 className="text-base font-semibold">Profit Trend</h3>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-2">
                 <p className="text-3xl font-semibold tracking-tight">${totalPaid.toLocaleString()}</p>
-                <span className="text-xs text-muted-foreground font-semibold flex items-center gap-0.5">
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5 bg-emerald-500/10 rounded-full px-2 py-0.5">
                   <ArrowUpRight className="w-3 h-3" /> +2.5%
                 </span>
               </div>
@@ -299,7 +309,7 @@ export default function Dashboard() {
               <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis hide />
               <Tooltip content={<CustomLineTooltip />} />
-              <Line type="monotone" dataKey="revenue" name="Revenue" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#c89b2a" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
               <Line type="monotone" dataKey="expenses" name="Expenses" stroke="hsl(var(--muted-foreground) / 0.4)" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
@@ -307,9 +317,12 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Invoices */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <div className="card-surface overflow-hidden p-5">
         <div className="mb-4 flex items-center justify-between">
-          <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">Activity</p><h3 className="mt-1 text-base font-semibold">Recent Invoices</h3></div>
+          <div>
+            <p className="eyebrow mb-1">Activity</p>
+            <h3 className="text-base font-semibold">Recent Invoices</h3>
+          </div>
           <button onClick={() => navigate('/invoices')} className="text-xs text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors">
             View all <ChevronRight className="w-3 h-3" />
           </button>

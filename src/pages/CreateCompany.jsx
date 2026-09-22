@@ -28,8 +28,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
 
@@ -53,15 +51,6 @@ export default function CreateCompany() {
     description: "",
     fiscal_year_start: "January",
   });
-
-  const getUserFromLocalStorage = () => {
-  try {
-    return JSON.parse(localStorage.getItem("user"));
-  } catch {
-    return null;
-  }
-};
-
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
@@ -91,15 +80,7 @@ export default function CreateCompany() {
   });
 
   const canCreateCompany = (existingCompaniesCount = 0) => {
-    const user = getUserFromLocalStorage();
-
-    const isFree = user?.subscription?.plan === "free";
-
-    if (isFree && existingCompaniesCount >= 1) {
-      return false;
-    }
-
-    return true;
+    return existingCompaniesCount < 1;
   };
 
   const handleCreateClick = (companiesCount) => {
@@ -279,24 +260,35 @@ export default function CreateCompany() {
           </div>
 
           <Dialog open={showLimitModal} onOpenChange={setShowLimitModal}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Subscription limit reached</DialogTitle>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Your free plan allows only one company. Upgrade your subscription to create another company.
+            <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
+              <div className="relative overflow-hidden bg-[#0c0e16] px-6 py-8 text-center">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(231,182,60,0.15),transparent_55%)]" />
+                <div className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f0c74f] via-[#d9ac34] to-[#9a7718] shadow-[0_10px_30px_-8px_rgba(199,154,39,0.8)]">
+                  <Building2 className="h-6 w-6 text-black" />
+                </div>
+                <h2 className="relative text-xl font-semibold text-white">
+                  One company per account
+                </h2>
+              </div>
+              <div className="px-6 py-6">
+                <p className="text-sm leading-6 text-muted-foreground">
+                  You can only create one company with this email address. You already have an active workspace, so you cannot create another company from this account.
                 </p>
-              </DialogHeader>
-              <DialogFooter className="gap-2">
+              </div>
+              <DialogFooter className="gap-2 border-t border-border px-6 py-4 sm:justify-between">
                 <Button variant="outline" onClick={() => setShowLimitModal(false)}>
                   Close
                 </Button>
                 <Button
-               onClick={() => {
-  setShowLimitModal(false);
-  window.location.href = "https://main.dsoa1hgcxw1e5.amplifyapp.com/dashboard";
-}}
+                  onClick={() => {
+                    setShowLimitModal(false);
+                    navigate("/personal", {
+                      replace: true,
+                      state: { activeSection: "companies" },
+                    });
+                  }}
                 >
-                  Manage Subscription
+                  Go to my workspace
                 </Button>
               </DialogFooter>
             </DialogContent>

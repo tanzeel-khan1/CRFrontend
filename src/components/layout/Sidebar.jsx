@@ -3,8 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Building2, Users, Receipt, FileText,
   FolderOpen, Settings, ChevronDown, Plus,
-  LogOut, BarChart2, Lightbulb, NotebookPen, UserSquare2, Home, KeyRound, MessageSquare, BookMarked, ScrollText,
-  User
+  Lightbulb, NotebookPen, UserSquare2, Home, BookMarked, ScrollText,
+  User, PanelLeft
 } from "lucide-react";
 import { api } from "@/api/apiClient";
 import {
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -29,7 +30,6 @@ const navItems = [
   // { path: "/chat", label: "Chat", icon: MessageSquare },
   { path: "/business-plan", label: "Business Plan", icon: BookMarked },
   // { path: "/aichat", label: "AI Chat", icon: MessageSquare },
-
 ];
 
 export default function Sidebar({
@@ -41,9 +41,12 @@ export default function Sidebar({
   setCollapsed,
   currentUser,
   onNavClick,
+  forceExpanded = false,
 }) {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const isCollapsed = collapsed && !forceExpanded;
 
   const isOwner =
     activeCompany?.created_by?.toLowerCase() === currentUser?.email?.toLowerCase();
@@ -53,36 +56,72 @@ export default function Sidebar({
     ...(isOwner ? [{ path: "/contracts", label: "Contracts", icon: ScrollText }] : []),
   ];
 
+  const navLink = (item, extra = "") => (
+    <Link key={item.path} to={item.path} title={isCollapsed ? item.label : undefined} onClick={onNavClick}>
+      <div
+        className={cn(
+          "relative flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200",
+          location.pathname === item.path
+            ? "bg-sidebar-primary/10 text-sidebar-foreground"
+            : "text-sidebar-foreground/55 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+          extra
+        )}
+      >
+        {location.pathname === item.path && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-full bg-[#c89b2a]" />
+        )}
+        <item.icon
+          className={cn(
+            "w-4 h-4 flex-shrink-0",
+            location.pathname === item.path && "text-[#c89b2a]"
+          )}
+        />
+        {!isCollapsed && <span>{item.label}</span>}
+        {!isCollapsed && location.pathname === item.path && (
+          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#c89b2a] opacity-80" />
+        )}
+      </div>
+    </Link>
+  );
+
   return (
     <aside
-      style={{ width: collapsed ? 72 : 240 }}
-      className="h-screen bg-sidebar text-sidebar-foreground flex flex-col fixed left-0 top-0 z-40 transition-all duration-200 border-r border-sidebar-border"
+      style={{ width: isCollapsed ? 72 : 240 }}
+      className="relative h-screen flex flex-col fixed left-0 top-0 z-40 transition-all duration-200 border-r border-sidebar-border bg-sidebar text-sidebar-foreground"
     >
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sidebar-foreground/[0.03] via-transparent to-[#e7b63c]/[0.05]" />
+
       {/* Logo */}
-      <div className="h-14 flex items-center px-4 border-b border-sidebar-border flex-shrink-0">
+      <div className="relative h-14 flex items-center px-4 border-b border-sidebar-border flex-shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden w-full">
-          <div className="w-7 h-7 rounded-md bg-white flex items-center justify-center flex-shrink-0">
-            <span className="text-black font-bold text-xs">R</span>
+          <div className="relative h-8 w-8 rounded-xl bg-gradient-to-br from-[#f0c74f] via-[#d9ac34] to-[#9a7718] shadow-[0_4px_16px_-4px_rgba(199,154,39,0.6)] flex items-center justify-center flex-shrink-0">
+            <span className="text-black font-black text-[13px] leading-none tracking-tight">R</span>
+            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar bg-foreground/80" />
           </div>
-          {!collapsed && (
-            <span className="font-semibold text-sm tracking-tight whitespace-nowrap text-sidebar-foreground">
-             Ranvola
-            </span>
+          {!isCollapsed && (
+            <div className="flex flex-col leading-none">
+              <span className="font-semibold text-sm tracking-tight whitespace-nowrap">
+                Ranvola
+              </span>
+              <span className="text-[9px] uppercase tracking-[0.28em] text-[#b3891f] mt-1 whitespace-nowrap">
+                Realtor Suite
+              </span>
+            </div>
           )}
         </div>
       </div>
 
       {/* Workspace Switcher */}
-      {!collapsed && (
-        <div className="px-3 py-3 border-b border-sidebar-border flex-shrink-0">
+      {!isCollapsed && (
+        <div className="relative px-3 py-3 border-b border-sidebar-border flex-shrink-0">
           <p className="text-[10px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest mb-2 px-1">
             Workspace
           </p>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-sidebar-accent transition-colors text-left">
-                <div className="w-7 h-7 rounded-md bg-sidebar-accent flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-3.5 h-3.5 text-sidebar-foreground/60" />
+              <button className="w-full flex items-center gap-2 p-2 rounded-xl border border-sidebar-border bg-sidebar-accent/60 hover:bg-sidebar-accent hover:border-[#c89b2a]/40 transition-all text-left">
+                <div className="w-7 h-7 rounded-lg bg-sidebar-accent border border-sidebar-border flex items-center justify-center flex-shrink-0">
+                  <Building2 className="w-3.5 h-3.5 text-[#b3891f]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate leading-tight">
@@ -97,10 +136,7 @@ export default function Sidebar({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-52">
               {companies.map((c) => (
-                <DropdownMenuItem
-                  key={c.id}
-                  onClick={() => setActiveCompany(c)}
-                >
+                <DropdownMenuItem key={c.id} onClick={() => setActiveCompany(c)}>
                   <Building2 className="w-4 h-4 mr-2" />
                   {c.name}
                 </DropdownMenuItem>
@@ -112,7 +148,7 @@ export default function Sidebar({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/personal")}>
                 <User className="w-4 h-4 mr-2" />
-                Go to Persnal
+                Go to Personal
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -120,72 +156,33 @@ export default function Sidebar({
       )}
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-2 py-3">
-        {!collapsed && (
+      <div className="relative flex-1 overflow-y-auto px-2 py-3">
+        {!isCollapsed && (
           <p className="text-[10px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest mb-2 px-2">
             Menu
           </p>
         )}
-        <nav className="space-y-0.5">
-          {allNavItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                title={collapsed ? item.label : undefined}
-                onClick={onNavClick}
-              >
-                <div
-                  className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors
-                    ${
-                      isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                    }`}
-                >
-                  <item.icon className="w-4 h-4 flex-shrink-0" />
-                  {!collapsed && <span>{item.label}</span>}
-                </div>
-              </Link>
-            );
-          })}
+        <nav className="space-y-1">
+          {allNavItems.map((item) => navLink(item))}
         </nav>
 
         {/* Settings */}
-        {!collapsed && (
+        {!isCollapsed && (
           <div className="mt-4">
             <p className="text-[10px] font-semibold text-sidebar-foreground/40 uppercase tracking-widest mb-2 px-2">
               General
             </p>
           </div>
         )}
-        <Link
-          to="/settings"
-          title={collapsed ? "Settings" : undefined}
-          onClick={onNavClick}
-        >
-          <div
-            className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors
-            ${
-              location.pathname === "/settings"
-                ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            }`}
-          >
-            <Settings className="w-4 h-4 flex-shrink-0" />
-            {!collapsed && <span>Settings</span>}
-          </div>
-        </Link>
+        {navLink({ path: "/settings", label: "Settings", icon: Settings })}
       </div>
 
       {/* User Profile at Bottom */}
-      <div className="border-t border-sidebar-border p-3 flex-shrink-0">
-        {collapsed ? (
-          /* Collapsed: avatar + toggle stacked and centered */
+      <div className="relative border-t border-sidebar-border p-3 flex-shrink-0">
+        {isCollapsed ? (
           <div className="flex flex-col items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-sidebar-accent flex items-center justify-center">
-              <span className="text-xs font-semibold text-sidebar-foreground">
+            <div className="h-8 w-8 rounded-full bg-sidebar-accent border border-sidebar-border flex items-center justify-center">
+              <span className="text-xs font-semibold">
                 {currentUser?.full_name?.[0] ||
                   currentUser?.email?.[0]?.toUpperCase() ||
                   "U"}
@@ -193,24 +190,23 @@ export default function Sidebar({
             </div>
             <button
               onClick={() => navigate("/personal")}
-              className="w-full flex items-center justify-center py-1 rounded-lg text-sidebar-foreground/30 hover:bg-sidebar-accent hover:text-sidebar-foreground/60 transition-colors"
+              className="w-full flex items-center justify-center py-1 rounded-lg text-sidebar-foreground/40 hover:bg-sidebar-accent hover:text-sidebar-foreground/70 transition-colors"
               title="Personal Home"
             >
               <Home className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setCollapsed(false)}
-              className="w-full flex items-center justify-center py-1 rounded-lg text-sidebar-foreground/30 hover:bg-sidebar-accent hover:text-sidebar-foreground/60 transition-colors text-[11px]"
+              className="w-full flex items-center justify-center py-1 rounded-lg text-sidebar-foreground/40 hover:bg-sidebar-accent hover:text-sidebar-foreground/70 transition-colors text-[11px]"
             >
-              →
+              <PanelLeft className="w-3.5 h-3.5" />
             </button>
           </div>
         ) : (
-          /* Expanded */
           <>
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-sidebar-accent flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-semibold text-sidebar-foreground">
+            <div className="flex items-center gap-2.5 rounded-xl border border-sidebar-border bg-sidebar-accent/50 p-2">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#3a3f55] to-[#1c1e2c] dark:from-[#3a3f55] dark:to-[#1c1e2c] border border-sidebar-border flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-semibold text-white">
                   {currentUser?.full_name?.[0] ||
                     currentUser?.email?.[0]?.toUpperCase() ||
                     "U"}
@@ -226,7 +222,7 @@ export default function Sidebar({
               </div>
               <button
                 onClick={() => navigate("/personal")}
-                className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-sidebar-foreground/40 hover:text-sidebar-foreground"
+                className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-sidebar-foreground/40 hover:text-[#b3891f]"
                 title="Personal Home"
               >
                 <Home className="w-3.5 h-3.5" />
@@ -234,9 +230,10 @@ export default function Sidebar({
             </div>
             <button
               onClick={() => setCollapsed(true)}
-              className="mt-2 w-full flex items-center justify-center py-1.5 rounded-lg text-sidebar-foreground/30 hover:bg-sidebar-accent hover:text-sidebar-foreground/60 transition-colors text-[11px] gap-1"
+              className="mt-2 w-full flex items-center justify-center py-1.5 rounded-lg text-sidebar-foreground/40 hover:bg-sidebar-accent hover:text-sidebar-foreground/70 transition-colors text-[11px] gap-1.5"
             >
-              ← Collapse
+              <PanelLeft className="w-3 h-3" />
+              Collapse
             </button>
           </>
         )}
