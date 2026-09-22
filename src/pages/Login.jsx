@@ -122,38 +122,56 @@ export default function Login() {
   };
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-muted/30" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(231,182,60,0.12),transparent_50%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(20,20,35,0.08),transparent_50%)]" />
 
-      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
-      <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#e7b63c]/20 blur-3xl" />
+      <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-[#141425]/15 blur-3xl" />
 
       <div className="relative min-h-screen flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-        <div className="w-full max-w-5xl grid overflow-hidden rounded-3xl border border-border bg-card/80 shadow-2xl backdrop-blur-xl lg:grid-cols-2">
-          <div className="hidden lg:flex flex-col justify-between bg-primary p-10 text-primary-foreground">
-            <div>
-              <div className="mb-10 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-foreground text-primary shadow">
-                  <span className="text-sm font-bold">R</span>
+        <div className="w-full max-w-5xl grid overflow-hidden rounded-3xl border border-border/80 bg-card/80 shadow-[0_20px_80px_-20px_rgba(20,20,35,0.35)] backdrop-blur-xl lg:grid-cols-2">
+          <div className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-[#0c0e16] p-10 text-white">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(231,182,60,0.18),transparent_55%)]" />
+            <div className="pointer-events-none absolute -bottom-20 -right-16 h-64 w-64 rounded-full border-[26px] border-[#e7b63c]/10" />
+            <div className="pointer-events-none absolute top-1/3 right-8 h-24 w-24 rounded-full bg-[#e7b63c]/10 blur-2xl" />
+
+            <div className="relative">
+              <div className="mb-12 flex items-center gap-3">
+                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#f0c74f] via-[#d9ac34] to-[#9a7718] shadow-[0_8px_24px_-6px_rgba(199,154,39,0.8)]">
+                  <span className="text-sm font-black text-black">R</span>
                 </div>
-                <span className="text-2xl font-bold tracking-tight">
-                  Ranvola
-                </span>
+                <div className="flex flex-col leading-none">
+                  <span className="text-2xl font-bold tracking-tight">Ranvola</span>
+                  <span className="text-[9px] mt-1 uppercase tracking-[0.3em] text-[#e7b63c]/80">Realtor Suite</span>
+                </div>
               </div>
 
               <div className="space-y-5">
-                <h2 className="max-w-md text-4xl font-bold leading-tight">
-Run your business with confidence.
+                <h2 className="max-w-md font-display text-5xl font-normal leading-[1.05] tracking-tight">
+                  Run your business with <em className="text-[#e7b63c]">confidence</em>.
                 </h2>
-                <p className="max-w-md text-sm leading-6 text-primary-foreground/80">
-                  Sign in to access your workspace, collaborate with your team, manage operations, and keep everything organized in one place.
+                <p className="max-w-md text-sm leading-6 text-white/60">
+                  The workspace built for realtors and brokers — clients, properties, deals and operations in one refined place.
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-primary-foreground/10 p-5 backdrop-blur">
-              <p className="text-sm leading-6 text-primary-foreground/80">
-                One workspace. Every workflow.
-              </p>
+            <div className="relative space-y-3">
+              {[
+                "Properties, clients & pipelines in one view",
+                "Invoices, expenses and profit tracking",
+                "Documents, teams and every workflow",
+              ].map((f) => (
+                <div key={f} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#e7b63c] shadow-[0_0_8px_rgba(199,154,39,0.9)]" />
+                  <p className="text-xs text-white/80">{f}</p>
+                </div>
+              ))}
+              <div className="rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 p-5 backdrop-blur mt-2">
+                <p className="font-display text-lg italic leading-relaxed text-white/80">
+                  "One workspace. Every workflow. Nothing slips through."
+                </p>
+              </div>
             </div>
           </div>
 
@@ -161,15 +179,16 @@ Run your business with confidence.
             <div className="w-full max-w-md">
               <div className="mb-8 flex items-center justify-between lg:hidden">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                    <span className="text-xs font-bold">R</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#f0c74f] via-[#d9ac34] to-[#9a7718] shadow-[0_6px_18px_-6px_rgba(199,154,39,0.8)]">
+                    <span className="text-xs font-black text-black">R</span>
                   </div>
                   <span className="text-xl font-bold">Ranvola</span>
                 </div>
               </div>
 
               <div className="mb-8">
-                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                <p className="eyebrow mb-2">{isLogin ? "Member access" : "Join Ranvola"}</p>
+                <h1 className="font-display text-3xl font-normal tracking-tight sm:text-4xl">
                   {isLogin ? "Welcome back" : "Create your account"}
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -179,13 +198,13 @@ Run your business with confidence.
                 </p>
               </div>
 
-              <div className="mb-6 grid grid-cols-2 rounded-xl bg-muted p-1">
+              <div className="mb-6 grid grid-cols-2 rounded-xl bg-muted p-1 border border-border/60">
                 <button
                   type="button"
                   onClick={() => setMode("login")}
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
                     isLogin
-                      ? "bg-background text-foreground shadow-sm"
+                      ? "bg-card text-foreground shadow-sm border border-border"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -197,7 +216,7 @@ Run your business with confidence.
                   onClick={() => setMode("register")}
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
                     !isLogin
-                      ? "bg-background text-foreground shadow-sm"
+                      ? "bg-card text-foreground shadow-sm border border-border"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
