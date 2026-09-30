@@ -43,7 +43,7 @@ export default defineConfig({
   },
 
   server: {
-    port: 7000, // yahan apna desired port likho
+    port: 7000, 
 
     proxy: {
       '/api': {
@@ -58,3 +58,15 @@ export default defineConfig({
     },
   },
 })
+
+
+
+
+
+
+
+
+
+
+
+

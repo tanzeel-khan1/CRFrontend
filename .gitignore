@@ -31,8 +31,4 @@ Thumbs.db
 .parcel-cache/
 .eslintcache
 
-# Vite
-vite.config.*.timestamp-*
-branch_structure.json
-temp_auto_push.bat
-temp_interactive_push.bat
+
