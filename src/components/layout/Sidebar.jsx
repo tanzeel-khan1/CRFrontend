@@ -62,24 +62,13 @@ export default function Sidebar({
         className={cn(
           "relative flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200",
           location.pathname === item.path
-            ? "bg-sidebar-primary/10 text-sidebar-foreground"
+            ? "bg-foreground text-background"
             : "text-sidebar-foreground/55 hover:bg-sidebar-accent hover:text-sidebar-foreground",
           extra
         )}
       >
-        {location.pathname === item.path && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-full bg-[#c89b2a]" />
-        )}
-        <item.icon
-          className={cn(
-            "w-4 h-4 flex-shrink-0",
-            location.pathname === item.path && "text-[#c89b2a]"
-          )}
-        />
+        <item.icon className="w-4 h-4 flex-shrink-0" />
         {!isCollapsed && <span>{item.label}</span>}
-        {!isCollapsed && location.pathname === item.path && (
-          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#c89b2a] opacity-80" />
-        )}
       </div>
     </Link>
   );
@@ -89,21 +78,18 @@ export default function Sidebar({
       style={{ width: isCollapsed ? 72 : 240 }}
       className="relative h-screen flex flex-col fixed left-0 top-0 z-40 transition-all duration-200 border-r border-sidebar-border bg-sidebar text-sidebar-foreground"
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sidebar-foreground/[0.03] via-transparent to-[#e7b63c]/[0.05]" />
-
       {/* Logo */}
       <div className="relative h-14 flex items-center px-4 border-b border-sidebar-border flex-shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden w-full">
-          <div className="relative h-8 w-8 rounded-xl bg-gradient-to-br from-[#f0c74f] via-[#d9ac34] to-[#9a7718] shadow-[0_4px_16px_-4px_rgba(199,154,39,0.6)] flex items-center justify-center flex-shrink-0">
-            <span className="text-black font-black text-[13px] leading-none tracking-tight">R</span>
-            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar bg-foreground/80" />
+          <div className="relative h-8 w-8 rounded-xl bg-foreground text-background flex items-center justify-center flex-shrink-0">
+            <span className="font-black text-[13px] leading-none tracking-tight">R</span>
           </div>
           {!isCollapsed && (
             <div className="flex flex-col leading-none">
               <span className="font-semibold text-sm tracking-tight whitespace-nowrap">
                 Ranvola
               </span>
-              <span className="text-[9px] uppercase tracking-[0.28em] text-[#b3891f] mt-1 whitespace-nowrap">
+              <span className="text-[9px] uppercase tracking-[0.28em] text-muted-foreground mt-1 whitespace-nowrap">
                 Realtor Suite
               </span>
             </div>
@@ -119,9 +105,9 @@ export default function Sidebar({
           </p>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-full flex items-center gap-2 p-2 rounded-xl border border-sidebar-border bg-sidebar-accent/60 hover:bg-sidebar-accent hover:border-[#c89b2a]/40 transition-all text-left">
+              <button className="w-full flex items-center gap-2 p-2 rounded-xl border border-sidebar-border bg-sidebar-accent/60 hover:bg-sidebar-accent hover:border-foreground/20 transition-all text-left">
                 <div className="w-7 h-7 rounded-lg bg-sidebar-accent border border-sidebar-border flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-3.5 h-3.5 text-[#b3891f]" />
+                  <Building2 className="w-3.5 h-3.5 text-foreground/70" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate leading-tight">
@@ -222,7 +208,7 @@ export default function Sidebar({
               </div>
               <button
                 onClick={() => navigate("/personal")}
-                className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-sidebar-foreground/40 hover:text-[#b3891f]"
+                className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-sidebar-foreground/40 hover:text-foreground"
                 title="Personal Home"
               >
                 <Home className="w-3.5 h-3.5" />

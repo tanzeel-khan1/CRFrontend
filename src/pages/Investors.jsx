@@ -635,7 +635,7 @@ const totalInvested = activeInvestors.reduce(
               </SelectContent>
             </Select>
             {form.user_email && form.contract_id && (
-              <p className="text-xs text-amber-600 dark:text-amber-400">
+              <p className="text-xs text-muted-foreground">
                 This user will receive an invitation and must agree to the contract before getting access.
               </p>
             )}

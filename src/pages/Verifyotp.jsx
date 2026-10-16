@@ -47,12 +47,12 @@ const Verifyotp = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-8">
-      <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
-      <div className="absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-slate-200/70 blur-3xl" />
-      <Card className="relative w-full max-w-md overflow-hidden rounded-2xl border-slate-200 bg-white shadow-xl shadow-slate-200/60">
-        <div className="bg-white px-6 py-7 text-slate-950 sm:px-8">
-          <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-300 text-slate-950"><ShieldCheck className="h-6 w-6" /></div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-8">
+      <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-foreground/5 blur-3xl" />
+      <div className="absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-foreground/8 blur-3xl" />
+      <Card className="relative w-full max-w-md overflow-hidden rounded-2xl border-border bg-card shadow-xl">
+        <div className="bg-card px-6 py-7 text-foreground sm:px-8">
+          <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground text-background"><ShieldCheck className="h-6 w-6" /></div>
           <CardTitle className="text-2xl font-semibold tracking-tight text-slate-950">Verify your email</CardTitle>
           <p className="mt-2 text-sm leading-6 text-slate-500">One quick step before you enter your workspace.</p>
         </div>

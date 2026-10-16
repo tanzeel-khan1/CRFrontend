@@ -5,7 +5,7 @@ import { useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/apiClient';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, MoreVertical, Pencil, Trash2, Send, Eye, Archive, Mail, Loader2 } from 'lucide-react';
+import { Plus, MoreVertical, Pencil, Trash2, Send, Eye, Archive, Mail, FileText, DollarSign, Clock, CheckCircle2 } from 'lucide-react';
 import TableSkeleton from '@/components/ui/TableSkeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -141,24 +141,47 @@ export default function Invoices() {
     setEmailTarget(null);
   };
 
+  const totalValue = invoices.reduce((sum, inv) => sum + Number(inv.total_amount || inv.amount || 0), 0);
+  const paidCount = invoices.filter((inv) => inv.status === 'paid').length;
+  const overdueCount = invoices.filter((inv) => inv.status === 'overdue').length;
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Invoices</h1>
-          <p className="text-sm text-muted-foreground mt-1">{invoices.length} total invoices</p>
+    <div className="space-y-6 pb-8">
+      <section className="page-hero">
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-background/55">Billing</p>
+            <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Invoices</h1>
+            <p className="mt-2 max-w-lg text-sm leading-6 text-background/70">{invoices.length} invoices across this workspace.</p>
+          </div>
+          <Button onClick={() => setDialogOpen(true)} disabled={!companyId} variant="secondary" className="gap-2 w-full sm:w-auto"><Plus className="w-4 h-4" /> Create Invoice</Button>
         </div>
-        <Button onClick={() => setDialogOpen(true)} disabled={!companyId} className="gap-2"><Plus className="w-4 h-4" /> Create Invoice</Button>
-      </div>
+        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full border-[24px] border-background/10" />
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[
+          { label: 'Total invoices', value: invoices.length, icon: FileText },
+          { label: 'Billed', value: `$${totalValue.toLocaleString()}`, icon: DollarSign },
+          { label: 'Paid', value: paidCount, icon: CheckCircle2 },
+          { label: 'Overdue', value: overdueCount, icon: Clock },
+        ].map(({ label, value, icon: Icon }) => (
+          <div key={label} className="stat-tile">
+            <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background"><Icon className="h-4 w-4" /></div>
+            <p className="text-xl font-semibold tracking-tight">{value}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+          </div>
+        ))}
+      </section>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
+        <TabsList className="h-auto flex-wrap bg-muted/60">
           <TabsTrigger value="all">All</TabsTrigger>
           {STATUSES.map(s => <TabsTrigger key={s} value={s} className="capitalize">{s}</TabsTrigger>)}
         </TabsList>
       </Tabs>
 
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         {invoicesLoading ? <TableSkeleton rows={5} cols={5} /> : (<>
         <table className="w-full">
           <thead>
@@ -219,11 +242,11 @@ export default function Invoices() {
       {/* Send Email Dialog */}
       <Dialog open={emailDialog} onOpenChange={setEmailDialog}>
         <DialogContent className="max-w-xl overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
-          <div className="bg-slate-950 px-6 py-6 text-white sm:px-7">
+          <div className="bg-foreground px-6 py-6 text-background sm:px-7">
             <DialogHeader>
               <div className="flex items-start gap-3 pr-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-300 text-slate-950"><Mail className="h-5 w-5" /></div>
-                <div><DialogTitle className="text-xl text-white">Send invoice</DialogTitle><p className="mt-1 text-sm text-slate-300">Deliver a clean invoice summary to your client.</p></div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-background text-foreground"><Mail className="h-5 w-5" /></div>
+                <div><DialogTitle className="text-xl text-background">Send invoice</DialogTitle><p className="mt-1 text-sm text-background/70">Deliver a clean invoice summary to your client.</p></div>
               </div>
             </DialogHeader>
           </div>
@@ -234,13 +257,13 @@ export default function Invoices() {
             </div>
             <div className="rounded-2xl border border-border bg-card p-5 shadow-sm"><div className="space-y-2"><Label htmlFor="invoice-email" className="text-xs font-semibold">Recipient email</Label><Input id="invoice-email" value={emailTo} onChange={e => setEmailTo(e.target.value)} placeholder="recipient@example.com" type="email" className="h-11 bg-background" /><p className="text-xs text-muted-foreground">The recipient will receive the invoice details and due date.</p></div></div>
           </div>
-          <DialogFooter className="border-t border-border bg-card px-6 py-4 sm:px-7"><Button variant="outline" onClick={() => setEmailDialog(false)}>Cancel</Button><Button onClick={sendInvoiceEmail} disabled={!emailTo.trim() || sendingEmail} className="gap-2 bg-slate-950 text-white hover:bg-slate-800"><Mail className="h-4 w-4" />{sendingEmail ? 'Sending...' : 'Send invoice'}</Button></DialogFooter>
+          <DialogFooter className="border-t border-border bg-card px-6 py-4 sm:px-7"><Button variant="outline" onClick={() => setEmailDialog(false)}>Cancel</Button><Button onClick={sendInvoiceEmail} disabled={!emailTo.trim() || sendingEmail} className="gap-2"><Mail className="h-4 w-4" />{sendingEmail ? 'Sending...' : 'Send invoice'}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={dialogOpen} onOpenChange={closeDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{editing ? 'Edit Invoice' : 'Create Invoice'}</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-lg rounded-2xl">
+          <DialogHeader><DialogTitle className="font-display text-2xl">{editing ? 'Edit Invoice' : 'Create Invoice'}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div><Label>Title</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Invoice title" /></div>
             <div className="grid grid-cols-2 gap-4">

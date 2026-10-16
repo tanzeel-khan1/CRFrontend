@@ -76,6 +76,7 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
           }}
           title="Toggle theme"
+          className="relative"
         >
           <Sun className="w-[18px] h-[18px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute w-[18px] h-[18px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -85,7 +86,7 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="w-[18px] h-[18px]" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-b from-[#ecbf45] to-[#c89b2a] text-background text-[10px] font-bold rounded-full flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(199,154,39,0.8)]">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-foreground text-background text-[10px] font-bold rounded-full flex items-center justify-center">
                   {unreadCount}
                 </span>
               )}
