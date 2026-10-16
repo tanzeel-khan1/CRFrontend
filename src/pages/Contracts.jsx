@@ -387,29 +387,31 @@ export default function Contracts() {
   const isCreating = createMutation.isPending;
 
   return (
-    <div className="flex h-full min-h-[calc(100vh-6rem)] flex-col gap-4 p-3 sm:p-4 lg:p-6">
-      <div className="flex flex-col justify-between gap-3 rounded-2xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-            Contracts
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create, manage, and edit company contracts in one place.
-          </p>
+    <div className="flex h-full min-h-[calc(100vh-6rem)] flex-col gap-4">
+      <section className="page-hero">
+        <div className="relative z-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-background/55">Legal</p>
+            <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Contracts</h1>
+            <p className="mt-2 max-w-lg text-sm leading-6 text-background/70">
+              Create, manage, and edit company contracts in one place.
+            </p>
+          </div>
+          <Button
+            onClick={openCreate}
+            disabled={isCreating}
+            variant="secondary"
+            className="w-full gap-2 sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            {isCreating ? "Creating Draft..." : "New Contract"}
+          </Button>
         </div>
-
-        <Button
-          onClick={openCreate}
-          disabled={isCreating}
-          className="w-full gap-2 sm:w-auto"
-        >
-          <Plus className="h-4 w-4" />
-          {isCreating ? "Creating Draft..." : "New Contract"}
-        </Button>
-      </div>
+        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full border-[24px] border-background/10" />
+      </section>
 
       <div className="grid flex-1 gap-4 lg:grid-cols-[360px_1fr]">
-        <Card className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl shadow-sm">
+        <Card className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           <CardHeader className="space-y-4 border-b p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -564,7 +566,7 @@ export default function Contracts() {
           </CardContent>
         </Card>
 
-        <Card className="min-h-[420px] overflow-hidden rounded-2xl shadow-sm">
+        <Card className="min-h-[420px] overflow-hidden rounded-2xl border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           {selected ? (
             <form onSubmit={handleSubmit} className="flex h-full flex-col">
               <CardHeader className="border-b p-4">
