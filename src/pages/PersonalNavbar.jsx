@@ -236,19 +236,6 @@ export default function PersonalNavbar(
                       {user?.email}
                     </p>
 
-                    <div
-                      className="
-                      inline-block
-                      mt-2 px-3 py-1
-                      rounded-full
-                      bg-green-100
-                      text-green-700
-                      text-xs
-                    "
-                    >
-                      {user?.subscription?.plan ||
-                        "Free"}
-                    </div>
                   </div>
 
                 </motion.div>

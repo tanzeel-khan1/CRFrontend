@@ -1,4 +1,5 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'https://ranvola.bonto.run';
+// const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const getToken = () => localStorage.getItem('token');
 const WAKE_TIMEOUT_MS = 45000;
 const RETRY_DELAY_MS = 500;
@@ -23,6 +24,15 @@ const normalize = (doc) => {
 const normalizeResult = (data) => Array.isArray(data) ? data.map(normalize) : normalize(data);
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+const createTransportError = (cause) => {
+  const message = cause?.name === 'AbortError'
+    ? 'The server took too long to respond. Please try again.'
+    : 'Unable to connect to the server. Check your connection and try again.';
+  const error = new Error(message);
+  error.cause = cause;
+  return error;
+};
 
 export const wakeBackend = async () => {
   const controller = new AbortController();
@@ -60,9 +70,7 @@ const request = async (method, path, body) => {
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
   } catch (cause) {
-    const error = new Error('Server is waking up. Please try again in a moment.');
-    error.cause = cause;
-    throw error;
+    throw createTransportError(cause);
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
@@ -83,9 +91,7 @@ const requestMultipart = async (method, path, formData) => {
       body: formData,
     });
   } catch (cause) {
-    const error = new Error('Server is waking up. Please try again in a moment.');
-    error.cause = cause;
-    throw error;
+    throw createTransportError(cause);
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
@@ -139,12 +145,21 @@ const entity = (resource) => ({
   createMultipart: (formData) => requestMultipart('POST', `/api/${resource}`, formData),
   updateMultipart: (id, formData) => requestMultipart('PUT', `/api/${resource}/${id}`, formData),
   delete: (id) => request('DELETE', `/api/${resource}/${id}`),
-  subscribe: (cb) => {
+  subscribe: (cb, onError = () => {}) => {
     let active = true;
+    let pollDelay = 2500;
     const poll = async () => {
       if (!active) return;
-      try { cb({ data: await request('GET', `/api/${resource}`) }); } catch (_) {}
-      if (active) setTimeout(poll, 2500);
+      try {
+        const data = await request('GET', `/api/${resource}`);
+        pollDelay = 2500;
+        if (active) cb({ data });
+      } catch (error) {
+        pollDelay = Math.min(pollDelay * 2, 30000);
+        if (active) onError(error);
+      } finally {
+        if (active) setTimeout(poll, pollDelay);
+      }
     };
     poll();
     return () => { active = false; };
