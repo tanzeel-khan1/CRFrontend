@@ -203,36 +203,90 @@ export default function Properties() {
         ))}
       </section>
 
-      <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3 shadow-sm lg:flex-row lg:items-center">
-        <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by title, address, or type" className="border-0 bg-muted/50 pl-9 shadow-none focus-visible:ring-1" /></div>
-        <div className="flex gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-          {['All', ...PROPERTY_STATUSES].map((status) => <Button key={status} size="sm" variant={filter === status ? 'default' : 'ghost'} onClick={() => setFilter(status)} className="whitespace-nowrap">{status}</Button>)}
+      <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-2 shadow-sm sm:p-3 lg:flex-row lg:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by title, address, or type" className="h-10 border-0 bg-muted/40 pl-9 shadow-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring/10 sm:h-11" />
+        </div>
+        <div className="flex gap-1 overflow-x-auto rounded-xl bg-muted/40 p-1 lg:pb-0">
+          {['All', ...PROPERTY_STATUSES].map((status) => (
+            <Button key={status} size="sm" variant={filter === status ? 'default' : 'ghost'} onClick={() => setFilter(status)} className="whitespace-nowrap px-2.5">
+              {status}
+            </Button>
+          ))}
         </div>
       </section>
 
-      {isLoading ? <div className="py-16 text-center text-muted-foreground">Loading properties...</div> : visibleProperties.length === 0 ? (
-        <div className="py-16 text-center text-muted-foreground border border-dashed border-border rounded-xl"><Building2 className="w-10 h-10 mx-auto mb-3 opacity-20" /><p>No properties found.</p><Button onClick={openAdd} variant="outline" className="mt-4 gap-2"><Plus className="w-4 h-4" /> Add your first property</Button></div>
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="h-9 w-9 animate-pulse rounded-full bg-muted" />
+          <p className="mt-3 text-sm text-muted-foreground">Loading properties...</p>
+        </div>
+      ) : visibleProperties.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <Building2 className="h-5 w-5 text-muted-foreground/80" />
+          </div>
+          <p className="mt-3 text-sm font-medium">No properties found</p>
+          <p className="mt-1 text-xs text-muted-foreground">Try adjusting your filters or add your first property.</p>
+          <Button onClick={openAdd} variant="outline" className="mt-4 gap-2">
+            <Plus className="h-4 w-4" /> Add your first property
+          </Button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {visibleProperties.map((property) => (
-            <article key={propertyId(property)} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <article key={propertyId(property)} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
               <div className="relative h-52 overflow-hidden bg-muted">
-                {property.photos?.[0] ? <img src={photoUrl(property.photos[0])} alt={property.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center text-muted-foreground"><Building2 className="h-10 w-10 opacity-20" /></div>}
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
-                <Badge className={`absolute left-3 top-3 border-0 ${STATUS_STYLES[property.status || 'Available']}`}>{property.status || 'Available'}</Badge>
-                <Badge className="absolute right-3 top-3 border-0 bg-white/90 text-slate-900">{property.listing_type}</Badge>
-                <p className="absolute bottom-3 left-4 text-lg font-semibold text-white">{Number(property.price || 0).toLocaleString()}</p>
+                {property.photos?.[0] ? (
+                  <img src={photoUrl(property.photos[0])} alt={property.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-muted-foreground">
+                    <Building2 className="h-10 w-10 opacity-20" />
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                <Badge className={`absolute left-3 top-3 border-0 shadow-sm ${STATUS_STYLES[property.status || 'Available']}`}>{property.status || 'Available'}</Badge>
+                <Badge className="absolute right-3 top-3 border-0 bg-white/95 text-slate-900 shadow-sm">{property.listing_type}</Badge>
+                <p className="absolute bottom-3 left-4 text-lg font-semibold tracking-tight text-white drop-shadow-sm">
+                  {Number(property.price || 0).toLocaleString()}
+                </p>
               </div>
               <div className="space-y-3 p-4">
-                <div><h2 className="truncate font-semibold">{property.title}</h2><p className="mt-1 flex items-center gap-1 truncate text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" />{property.address}</p></div>
+                <div>
+                  <h2 className="truncate text-base font-semibold leading-tight">{property.title}</h2>
+                  <p className="mt-1 flex items-center gap-1 truncate text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{property.address}</span>
+                  </p>
+                </div>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><BedDouble className="w-3.5 h-3.5" />{property.bedrooms} beds</span>
-                  <span className="inline-flex items-center gap-1"><Bath className="w-3.5 h-3.5" />{property.bathrooms} baths</span>
-                  <span className="inline-flex items-center gap-1"><Ruler className="w-3.5 h-3.5" />{property.area} sqft</span>
+                  <span className="inline-flex items-center gap-1">
+                    <BedDouble className="h-3.5 w-3.5" />
+                    {property.bedrooms} beds
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Bath className="h-3.5 w-3.5" />
+                    {property.bathrooms} baths
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Ruler className="h-3.5 w-3.5" />
+                    {property.area} sqft
+                  </span>
                 </div>
                 <div className="flex items-center justify-between border-t border-border pt-2">
-                  <span className="text-xs text-muted-foreground">{property.property_type} {property.photos?.length ? `· ${property.photos.length} photo${property.photos.length > 1 ? 's' : ''}` : ''}</span>
-                  <div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => openEdit(property)} title="Edit property"><Pencil className="w-4 h-4" /></Button><Button variant="ghost" size="icon" onClick={() => setDeleteTarget(property)} title="Delete property"><Trash2 className="w-4 h-4 text-destructive" /></Button></div>
+                  <span className="text-xs text-muted-foreground">
+                    {property.property_type}
+                    {property.photos?.length ? ` · ${property.photos.length} photo${property.photos.length > 1 ? 's' : ''}` : ''}
+                  </span>
+                  <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(property)} title="Edit property">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteTarget(property)} title="Delete property">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </article>

@@ -174,60 +174,92 @@ export default function Invoices() {
         ))}
       </section>
 
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="h-auto flex-wrap bg-muted/60">
-          <TabsTrigger value="all">All</TabsTrigger>
-          {STATUSES.map(s => <TabsTrigger key={s} value={s} className="capitalize">{s}</TabsTrigger>)}
-        </TabsList>
-      </Tabs>
+      <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-2 shadow-sm sm:p-3 lg:flex-row lg:items-center lg:justify-between">
+        <Tabs value={tab} onValueChange={setTab} className="w-full lg:w-auto">
+          <TabsList className="h-9 flex-wrap gap-1 bg-muted/40 p-1">
+            <TabsTrigger value="all" className="px-2.5 text-xs">All</TabsTrigger>
+            {STATUSES.map((s) => (
+              <TabsTrigger key={s} value={s} className="px-2.5 text-xs capitalize">
+                {s}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </section>
 
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        {invoicesLoading ? <TableSkeleton rows={5} cols={5} /> : (<>
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left text-xs font-semibold text-muted-foreground px-5 py-3">Invoice</th>
-              <th className="text-left text-xs font-semibold text-muted-foreground px-5 py-3">Recipient</th>
-              <th className="text-left text-xs font-semibold text-muted-foreground px-5 py-3">Amount</th>
-              <th className="text-left text-xs font-semibold text-muted-foreground px-5 py-3">Due Date</th>
-              <th className="text-left text-xs font-semibold text-muted-foreground px-5 py-3">Status</th>
-              <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <AnimatePresence>
-              {filtered.map((inv, i) => (
-                <motion.tr key={inv.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
-                  className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <p className="text-sm font-medium">{inv.title}</p>
-                    <p className="text-xs text-muted-foreground">{inv.invoice_number}</p>
-                  </td>
-                  <td className="px-5 py-3.5 text-sm">{inv.recipient_name || '—'}</td>
-                  <td className="px-5 py-3.5 text-sm font-semibold">${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
-                  <td className="px-5 py-3.5 text-sm text-muted-foreground">{inv.due_date ? format(new Date(inv.due_date), 'MMM d, yyyy') : '—'}</td>
-                  <td className="px-5 py-3.5">
-                    <Badge className={`text-xs capitalize ${statusStyles[inv.status] || ''}`}>{inv.status}</Badge>
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="w-4 h-4" /></Button></DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEdit(inv)}><Pencil className="w-4 h-4 mr-2" />Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openEmailDialog(inv)}><Mail className="w-4 h-4 mr-2" />Send via Email</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => updateMutation.mutate({ id: inv.id, data: { status: 'sent' } })}><Send className="w-4 h-4 mr-2" />Mark Sent</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => updateMutation.mutate({ id: inv.id, data: { status: 'paid' } })}><Eye className="w-4 h-4 mr-2" />Mark Paid</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => updateMutation.mutate({ id: inv.id, data: { status: 'archived' } })}><Archive className="w-4 h-4 mr-2" />Archive</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => setDeleteTarget(inv)}><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+        {invoicesLoading ? <TableSkeleton rows={5} cols={5} /> : (
+          <>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-muted/40">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Invoice</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Recipient</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Amount</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Due Date</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Status</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {filtered.map((inv, i) => (
+                    <motion.tr
+                      key={inv.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ delay: i * 0.015, duration: 0.2 }}
+                      className="group border-b border-border last:border-0 transition-colors hover:bg-muted/30"
+                    >
+                      <td className="px-5 py-3.5">
+                        <p className="text-sm font-medium leading-tight">{inv.title}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{inv.invoice_number}</p>
+                      </td>
+                      <td className="px-5 py-3.5 text-sm">{inv.recipient_name || '—'}</td>
+                      <td className="px-5 py-3.5 text-sm font-semibold tracking-tight">${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground">{inv.due_date ? format(new Date(inv.due_date), 'MMM d, yyyy') : '—'}</td>
+                      <td className="px-5 py-3.5">
+                        <Badge className={`text-xs capitalize shadow-sm ${statusStyles[inv.status] || ''}`}>{inv.status}</Badge>
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                    <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(inv)} title="Edit">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuItem onClick={() => openEdit(inv)}><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEmailDialog(inv)}><Mail className="mr-2 h-4 w-4" />Send via Email</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateMutation.mutate({ id: inv.id, data: { status: 'sent' } })}><Send className="mr-2 h-4 w-4" />Mark Sent</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateMutation.mutate({ id: inv.id, data: { status: 'paid' } })}><CheckCircle2 className="mr-2 h-4 w-4" />Mark Paid</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateMutation.mutate({ id: inv.id, data: { status: 'archived' } })}><Archive className="mr-2 h-4 w-4" />Archive</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteTarget(inv)}><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </td>
                 </motion.tr>
               ))}
             </AnimatePresence>
           </tbody>
         </table>
-        {filtered.length === 0 && <div className="text-center py-12 text-muted-foreground text-sm">No invoices found.</div>}
+        {filtered.length === 0 && !invoicesLoading && (
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <FileText className="h-5 w-5 text-muted-foreground/80" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">No invoices found</p>
+              <p className="mt-1 text-xs text-muted-foreground">Try adjusting your filters or create a new invoice.</p>
+            </div>
+          </div>
+        )}
         </>)}
       </div>
 

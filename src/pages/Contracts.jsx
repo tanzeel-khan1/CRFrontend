@@ -75,97 +75,99 @@ function RichTextEditor({ value, onChange }) {
   return (
     <div className="overflow-hidden rounded-xl">
       <div className="flex flex-wrap items-center gap-1 rounded-t-xl border bg-muted/30 p-2">
-        <Button
-          type="button"
-          size="icon"
-          variant={editor.isActive("bold") ? "default" : "ghost"}
-          className="h-8 w-8"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
+        <div className="flex flex-wrap items-center gap-0.5 rounded-lg bg-background/70 p-0.5 shadow-sm ring-1 ring-border/60">
+          <Button
+            type="button"
+            size="icon"
+            variant={editor.isActive("bold") ? "default" : "ghost"}
+            className="h-8 w-8"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          size="icon"
-          variant={editor.isActive("italic") ? "default" : "ghost"}
-          className="h-8 w-8"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant={editor.isActive("italic") ? "default" : "ghost"}
+            className="h-8 w-8"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          size="icon"
-          variant={
-            editor.isActive("heading", { level: 1 }) ? "default" : "ghost"
-          }
-          className="h-8 w-8"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
-          }
-        >
-          <Heading1 className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant={
+              editor.isActive("heading", { level: 1 }) ? "default" : "ghost"
+            }
+            className="h-8 w-8"
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 1 }).run()
+            }
+          >
+            <Heading1 className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          size="icon"
-          variant={
-            editor.isActive("heading", { level: 2 }) ? "default" : "ghost"
-          }
-          className="h-8 w-8"
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-        >
-          <Heading2 className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant={
+              editor.isActive("heading", { level: 2 }) ? "default" : "ghost"
+            }
+            className="h-8 w-8"
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 2 }).run()
+            }
+          >
+            <Heading2 className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          size="icon"
-          variant={editor.isActive("bulletList") ? "default" : "ghost"}
-          className="h-8 w-8"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
-          <List className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant={editor.isActive("bulletList") ? "default" : "ghost"}
+            className="h-8 w-8"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+          >
+            <List className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          size="icon"
-          variant={editor.isActive("orderedList") ? "default" : "ghost"}
-          className="h-8 w-8"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant={editor.isActive("orderedList") ? "default" : "ghost"}
+            className="h-8 w-8"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
 
-        <div className="mx-1 h-6 w-px bg-border" />
+          <div className="mx-1 h-6 w-px bg-border" />
 
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8"
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-        >
-          <Undo className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8"
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-        >
-          <Redo className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <EditorContent editor={editor} />
@@ -368,12 +370,12 @@ export default function Contracts() {
         <Card className="w-full max-w-md border-dashed">
           <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-              <Shield className="h-7 w-7 text-muted-foreground" />
+              <Shield className="h-7 w-7 text-muted-foreground/80" />
             </div>
 
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold">Access restricted</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-base font-semibold">Access restricted</h2>
+              <p className="max-w-xs text-sm text-muted-foreground">
                 Only the company owner can access Contracts.
               </p>
             </div>
@@ -566,14 +568,14 @@ export default function Contracts() {
           </CardContent>
         </Card>
 
-        <Card className="min-h-[420px] overflow-hidden rounded-2xl border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <Card className="min-h-[420px] overflow-hidden rounded-2xl border-border shadow-sm transition-shadow hover:shadow-md">
           {selected ? (
             <form onSubmit={handleSubmit} className="flex h-full flex-col">
               <CardHeader className="border-b p-4">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="mb-2 flex items-center gap-2">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-background">
                         <FileText className="h-4 w-4" />
                       </div>
 
@@ -599,7 +601,7 @@ export default function Contracts() {
                 </div>
               </CardHeader>
 
-              <CardContent className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6">
+              <CardContent className="flex-1 space-y-5 overflow-y-auto bg-muted/10 p-4 sm:p-6">
                 <div className="space-y-2">
                   <Label htmlFor="title">Title</Label>
                   <Input
@@ -607,6 +609,7 @@ export default function Contracts() {
                     value={form.title}
                     onChange={(e) => setFormValue("title", e.target.value)}
                     placeholder="Untitled Draft"
+                    className="h-11 bg-background"
                   />
                 </div>
 
@@ -619,6 +622,7 @@ export default function Contracts() {
                       setFormValue("description", e.target.value)
                     }
                     placeholder="Brief description of this contract"
+                    className="h-11 bg-background"
                   />
                 </div>
 
@@ -632,9 +636,9 @@ export default function Contracts() {
               </CardContent>
             </form>
           ) : (
-            <CardContent className="flex min-h-[420px] flex-col items-center justify-center gap-4 p-6 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                <FileText className="h-8 w-8 text-muted-foreground" />
+            <CardContent className="flex min-h-[420px] flex-col items-center justify-center gap-4 bg-muted/10 p-6 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background shadow-sm ring-1 ring-border/60">
+                <FileText className="h-8 w-8 text-foreground/80" />
               </div>
 
               <div className="space-y-1">
@@ -649,8 +653,9 @@ export default function Contracts() {
                 variant="outline"
                 onClick={openCreate}
                 disabled={isCreating}
+                className="gap-2"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-4 w-4" />
                 {isCreating ? "Creating Draft..." : "New Contract"}
               </Button>
             </CardContent>
