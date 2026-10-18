@@ -38,12 +38,12 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
         setActivities(event.data.filter(a => a.user_email === currentUser.email).slice(0, 20));
         setActivityError(false);
       }
-    });
-      }, () => setActivityError(true));
-      return () => {
-        active = false;
-        unsubscribe();
-      };
+    }, () => setActivityError(true));
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, [currentUser?.email]);
 
   const unreadCount = activities.filter(a => !readIds.has(a.id)).length;
