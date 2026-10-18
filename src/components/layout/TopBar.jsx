@@ -16,21 +16,34 @@ function getStoredReadIds() {
 export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, onMenuToggle, currentUser }) {
   const [activities, setActivities] = useState([]);
   const [readIds, setReadIds] = useState(getStoredReadIds);
+  const [activityError, setActivityError] = useState(false);
 
   useEffect(() => {
     if (!currentUser?.email) return;
+    let active = true;
 
     // Only load activities created by the current user
     api.entities.Activity.filter({ user_email: currentUser.email }, '-created_date', 20)
-      .then(setActivities);
+      .then((data) => {
+        if (!active) return;
+        setActivities(data);
+        setActivityError(false);
+      })
+      .catch(() => {
+        if (active) setActivityError(true);
+      });
 
     const unsubscribe = api.entities.Activity.subscribe((event) => {
       if (Array.isArray(event.data)) {
         setActivities(event.data.filter(a => a.user_email === currentUser.email).slice(0, 20));
+        setActivityError(false);
       }
     });
-
-    return unsubscribe;
+      }, () => setActivityError(true));
+      return () => {
+        active = false;
+        unsubscribe();
+      };
   }, [currentUser?.email]);
 
   const unreadCount = activities.filter(a => !readIds.has(a.id)).length;
@@ -102,8 +115,9 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
               )}
             </div>
             <ScrollArea className="max-h-64">
+              {activityError && <p role="status" className="border-b border-border px-3 py-2 text-xs text-destructive">Activity updates paused. Retrying automatically.</p>}
               {activities.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-6">No activity yet</p>
+                <p className="text-xs text-muted-foreground text-center py-6">{activityError ? 'Unable to load activity right now.' : 'No activity yet'}</p>
               ) : (
                 activities.slice(0, 10).map(a => (
                   <div key={a.id} className={`p-3 border-b border-border last:border-0 transition-colors ${readIds.has(a.id) ? 'opacity-40' : 'hover:bg-muted/30'}`}>

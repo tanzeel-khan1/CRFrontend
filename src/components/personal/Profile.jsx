@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/apiClient";
 import { toast } from "sonner";
-import { Search, Bell, Command, Menu, Sun, Moon, LogOut } from "lucide-react";
+import { BadgeCheck, Moon, Pencil, Save, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Profile = () => {
@@ -433,126 +433,126 @@ const Profile = () => {
 //       </div>
 //     </div>
 //   );
-return (
-  <div className="w-full min-h-screen py-6 px-4 sm:px-6 lg:px-8 transition-all duration-300">
-    <div className="w-full mx-auto">
-      {/* TOP HEADER */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Account
-          </h1>
-          <p className="mt-1 text-sm sm:text-base text-gray-500 dark:text-gray-400">
-            Manage your profile and subscription details
-          </p>
+  return (
+    <div className="w-full px-3 py-6 sm:px-4 sm:py-8">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="mb-7 flex items-end justify-between gap-4 border-b border-gray-200 pb-5 dark:border-zinc-800 sm:mb-8">
+          <div>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">Personal workspace</p>
+            <h1 className="font-display text-4xl text-gray-900 dark:text-white sm:text-5xl">Account</h1>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 sm:text-base">Manage your profile and subscription details</p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Toggle theme"
+            onClick={() => {
+              const isDark = document.documentElement.classList.toggle("dark");
+              localStorage.setItem("theme", isDark ? "dark" : "light");
+            }}
+            className="relative mb-1 shrink-0 rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow dark:border-zinc-800 dark:bg-zinc-900"
+          >
+            <Sun className="h-5 w-5 text-gray-900 transition-all duration-300 dark:scale-0 dark:-rotate-90 dark:text-white" />
+            <Moon className="absolute h-5 w-5 scale-0 rotate-90 text-gray-900 transition-all duration-300 dark:scale-100 dark:rotate-0 dark:text-white" />
+          </Button>
         </div>
 
-        {/* THEME BUTTON */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            const isDark = document.documentElement.classList.toggle("dark");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-          }}
-          className="relative rounded-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow transition-all duration-200 shrink-0"
-        >
-          <Sun className="w-5 h-5 text-gray-900 dark:text-white rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute w-5 h-5 text-gray-900 dark:text-white rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
-        </Button>
-      </div>
-
-      {/* WRAPPER (Grid removed to take full width) */}
-      <div className="w-full">
-        {/* PROFILE CARD */}
-        <div className="w-full relative overflow-hidden rounded-[28px] sm:rounded-[32px] border border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl shadow-xl p-6 sm:p-8">
-          
-          {/* Ambient Glow */}
-          <div className="absolute -top-24 -right-24 w-60 h-60 rounded-full bg-black/5 dark:bg-white/10 blur-3xl pointer-events-none" />
-
-          <div className="relative w-full">
-            {/* User Profile Header */}
-            <div className="flex items-center gap-5">
-              <div className="relative shrink-0">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-foreground text-background flex items-center justify-center text-2xl sm:text-3xl font-bold shadow-xl ring-2 ring-foreground/15 ring-offset-2 ring-offset-background">
-                  {getInitials(formData.full_name)}
+        <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_18px_45px_-30px_rgba(0,0,0,0.35)] dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="grid lg:grid-cols-[minmax(250px,0.8fr)_minmax(0,1.7fr)]">
+            <aside className="flex flex-col items-start border-b border-gray-200 bg-gray-50/70 px-6 py-7 text-left dark:border-zinc-800 dark:bg-zinc-900/50 sm:px-8 sm:py-8 lg:border-b-0 lg:border-r lg:px-9 lg:py-10">
+              <p className="mb-6 self-start text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Account profile</p>
+              <div className="flex w-full items-center gap-4 sm:gap-5 lg:flex-col lg:items-start">
+                <div className="relative shrink-0">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-black text-2xl font-semibold text-white shadow-lg ring-1 ring-black/10 dark:bg-white dark:text-black dark:ring-white/20 sm:h-24 sm:w-24">
+                    {getInitials(formData.full_name)}
+                  </div>
+                  <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-[3px] border-gray-50 bg-black dark:border-zinc-900 dark:bg-white" />
                 </div>
-
-                <span className="absolute bottom-0.5 right-0.5 w-4 h-4 sm:w-5 sm:h-5 bg-gray-900 dark:bg-white border-[3px] border-white dark:border-zinc-950 rounded-full shadow-sm" />
-              </div>
-
-              <div className="min-w-0 flex-1 space-y-1">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
-                  {formData.full_name || "User"}
-                </h2>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
-                  {formData.email}
-                </p>
-                <div className="pt-1">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-gray-900 dark:bg-white text-white dark:text-black text-xs font-semibold tracking-wide">
+                <div className="min-w-0 lg:mt-5">
+                  <h2 className="truncate font-display text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
+                    {formData.full_name || "User"}
+                  </h2>
+                  <p className="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">{formData.email}</p>
+                  <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-black px-3 py-1.5 text-xs font-semibold text-white dark:bg-white dark:text-black">
+                    <BadgeCheck className="h-3.5 w-3.5" />
                     Verified Account
                   </span>
                 </div>
               </div>
-            </div>
+            </aside>
 
-            {/* Input Form Fields */}
-            <div className="mt-8 space-y-5 w-full">
-              {[
-                { label: "Full Name", name: "full_name", type: "text" },
-                { label: "Email Address", name: "email", type: "email" },
-              ].map((field) => (
-                <div key={field.name} className="space-y-1.5 w-full">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    {field.label}
-                  </label>
-
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    value={formData[field.name]}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    className="w-full rounded-2xl px-4 sm:px-5 py-3.5 bg-gray-100 dark:bg-zinc-900 text-gray-900 dark:text-white border border-transparent disabled:opacity-75 disabled:cursor-not-allowed focus:border-gray-300 dark:focus:border-zinc-700 focus:bg-white dark:focus:bg-zinc-950 focus:ring-4 focus:ring-gray-900/10 dark:focus:ring-white/10 outline-none transition-all duration-200"
-                  />
+            <div className="px-6 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10">
+              <div className="mb-7 flex flex-col gap-2 border-b border-gray-200 pb-5 dark:border-zinc-800 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h3 className="font-display text-xl font-semibold text-gray-900 dark:text-white">Profile details</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Your personal account information</p>
                 </div>
-              ))}
-            </div>
+                {isEditing && <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Editing profile</span>}
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3 mt-8 w-full">
-              {!isEditing ? (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="w-full rounded-2xl py-3.5 bg-black dark:bg-white text-white dark:text-black font-semibold shadow-md hover:shadow-lg hover:scale-[1.005] active:scale-[0.995] transition-all duration-200"
-                >
-                  Edit Profile
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={handleUpdate}
-                    disabled={loading}
-                    className="flex-1 rounded-2xl py-3.5 bg-black dark:bg-white text-white dark:text-black font-semibold shadow-md hover:shadow-lg hover:scale-[1.005] active:scale-[0.995] disabled:opacity-50 transition-all duration-200"
-                  >
-                    {loading ? "Saving..." : "Save Changes"}
-                  </button>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                {[
+                  { label: "Full name", name: "full_name", type: "text" },
+                  { label: "Email address", name: "email", type: "email" },
+                ].map((field) => (
+                  <div key={field.name} className="min-w-0 space-y-2">
+                    <label htmlFor={`profile-${field.name}`} className="block text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
+                      {field.label}
+                    </label>
+                    <input
+                      id={`profile-${field.name}`}
+                      type={field.type}
+                      name={field.name}
+                      value={formData[field.name]}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:ring-4 focus:ring-gray-900/5 disabled:cursor-not-allowed disabled:opacity-100 dark:border-zinc-800 dark:bg-zinc-900/70 dark:text-white dark:focus:border-zinc-600 dark:focus:bg-zinc-950 dark:focus:ring-white/5"
+                    />
+                  </div>
+                ))}
+              </div>
 
+              <div className="mt-8 flex flex-col-reverse justify-end gap-2 border-t border-gray-200 pt-5 dark:border-zinc-800 sm:flex-row">
+                {!isEditing ? (
                   <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-6 rounded-2xl py-3.5 border border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-zinc-900 active:scale-[0.995] transition-all duration-200"
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-black px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                   >
-                    Cancel
+                    <Pencil className="h-4 w-4" />
+                    Edit profile
                   </button>
-                </>
-              )}
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({ full_name: currentUser?.full_name || "", email: currentUser?.email || "" });
+                        setIsEditing(false);
+                      }}
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-900"
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleUpdate}
+                      disabled={loading}
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-black px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                    >
+                      <Save className="h-4 w-4" />
+                      {loading ? "Saving..." : "Save changes"}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default Profile;

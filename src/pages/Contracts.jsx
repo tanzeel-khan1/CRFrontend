@@ -579,7 +579,7 @@ export default function Contracts() {
                         <FileText className="h-4 w-4" />
                       </div>
 
-                      <CardTitle className="truncate text-lg sm:text-xl">
+                      <CardTitle className="font-display truncate text-xl sm:text-2xl">
                         Edit Contract
                       </CardTitle>
                     </div>
@@ -601,9 +601,9 @@ export default function Contracts() {
                 </div>
               </CardHeader>
 
-              <CardContent className="flex-1 space-y-5 overflow-y-auto bg-muted/10 p-4 sm:p-6">
+              <CardContent className="flex-1 space-y-6 overflow-y-auto bg-muted/10 p-4 sm:p-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
+                  <Label htmlFor="title" className="text-xs font-semibold">Title</Label>
                   <Input
                     id="title"
                     value={form.title}
@@ -614,7 +614,7 @@ export default function Contracts() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="text-xs font-semibold">Description</Label>
                   <Input
                     id="description"
                     value={form.description}
@@ -627,7 +627,7 @@ export default function Contracts() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Contract Content</Label>
+                  <Label className="text-xs font-semibold">Contract content</Label>
                   <RichTextEditor
                     value={form.content}
                     onChange={(value) => setFormValue("content", value)}

@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, useOutletContext } fr
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { wakeBackend } from '@/api/apiClient';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 
 import AppLayout from './components/layout/AppLayout';
 import PersonalLayout from './components/personal/PersonalLayout';
@@ -35,7 +36,7 @@ import Hpc from './pages/Hpc';
 import { useEffect } from 'react';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isAuthenticated, authChecked } = useAuth();
+  const { isLoadingAuth, isAuthenticated, authChecked, authError, checkUserAuth } = useAuth();
 
   if (isLoadingAuth || !authChecked) {
     return (
@@ -50,6 +51,24 @@ const AuthenticatedApp = () => {
           <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin"></div>
         </div>
       </div>
+    );
+  }
+
+  if (!isAuthenticated && authError?.type === 'connection_error') {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-5 text-foreground">
+        <section role="alert" className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
+          <h1 className="font-display text-2xl font-semibold">Can’t verify your session</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Check your connection and try again. You’re still signed in on this device.</p>
+          <button
+            type="button"
+            onClick={checkUserAuth}
+            className="mt-6 inline-flex h-10 items-center justify-center rounded-lg bg-foreground px-5 text-sm font-semibold text-background transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            Retry
+          </button>
+        </section>
+      </main>
     );
   }
 
@@ -105,7 +124,9 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <AuthenticatedApp />
+          <ErrorBoundary>
+            <AuthenticatedApp />
+          </ErrorBoundary>
         </Router>
         <Toaster />
         <SonnerToaster position="bottom-right" />

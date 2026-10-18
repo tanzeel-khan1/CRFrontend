@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { CalendarDays, CheckCircle2, DollarSign, Mail, MapPin, Pencil, Phone, Plus, Search, Sparkles, Trash2, UserRound } from 'lucide-react';
+import { CalendarDays, CheckCircle2, DollarSign, Mail, MapPin, Pencil, Phone, Plus, RefreshCw, Search, Sparkles, Trash2, UserRound } from 'lucide-react';
 import { api } from '@/api/apiClient';
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog';
 import { Button } from '@/components/ui/button';
@@ -35,11 +35,12 @@ export default function Clients() {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
 
-  const { data: clients = [], isLoading } = useQuery({
+  const { data: clients = [], isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ['clients', companyId],
     queryFn: () => api.entities.Client.filter({ company_id: companyId }, '-created_date'),
     enabled: !!companyId,
     initialData: [],
+    meta: { handledInComponent: true },
   });
 
   const visibleClients = clients.filter((client) => {
@@ -144,6 +145,18 @@ export default function Clients() {
           <div className="h-9 w-9 animate-pulse rounded-full bg-muted" />
           <p className="mt-3 text-sm text-muted-foreground">Loading clients...</p>
         </div>
+      ) : isError ? (
+        <div role="alert" className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-16 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <RefreshCw className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="mt-3 text-sm font-medium">Clients couldn’t load</p>
+          <p className="mt-1 max-w-sm text-xs text-muted-foreground">{error?.message || 'Check your connection and try again.'}</p>
+          <Button onClick={() => refetch()} disabled={isFetching} variant="outline" className="mt-4 gap-2">
+            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            {isFetching ? 'Retrying...' : 'Retry'}
+          </Button>
+        </div>
       ) : visibleClients.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
@@ -224,11 +237,11 @@ export default function Clients() {
 
       <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
         <DialogContent className="flex max-h-[calc(100vh-2rem)] max-w-3xl flex-col gap-0 overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
-          <div className="shrink-0 border-b border-background/10 bg-foreground px-5 py-5 text-background sm:px-7"><DialogHeader><div className="flex items-start gap-3 pr-8"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background text-foreground"><UserRound className="h-5 w-5" /></div><div><DialogTitle className="text-xl text-background">{editing ? 'Edit client' : 'Add a client'}</DialogTitle><p className="mt-1 text-sm text-background/70">Capture the details your next deal depends on.</p></div></div></DialogHeader></div>
-          <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col"><div className="min-h-0 flex-1 space-y-6 overflow-y-auto bg-muted/30 px-5 py-6 sm:px-7">
-            <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"><div className="mb-4 flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground text-xs font-semibold text-background">01</span><div><h3 className="text-sm font-semibold">Contact details</h3><p className="text-xs text-muted-foreground">The person behind the opportunity.</p></div></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div className="space-y-1.5 sm:col-span-2"><Label htmlFor="client-name" className="text-xs font-semibold">Full name <span className="text-foreground">*</span></Label><Input className="h-11 bg-background" id="client-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Client full name" /></div><div className="space-y-1.5"><Label htmlFor="client-email" className="text-xs font-semibold">Email</Label><Input className="h-11 bg-background" id="client-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="client@example.com" /></div><div className="space-y-1.5"><Label htmlFor="client-phone" className="text-xs font-semibold">Phone number</Label><Input className="h-11 bg-background" id="client-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone number" /></div><div className="space-y-1.5 sm:col-span-2"><Label htmlFor="client-address" className="text-xs font-semibold">Address</Label><Input className="h-11 bg-background" id="client-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Client address" /></div></div></section>
-            <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"><div className="mb-4 flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground text-xs font-semibold text-background">02</span><div><h3 className="text-sm font-semibold">Deal profile</h3><p className="text-xs text-muted-foreground">Track the opportunity at a glance.</p></div></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-3"><div className="space-y-1.5"><Label htmlFor="client-budget" className="text-xs font-semibold">Budget</Label><Input className="h-11 bg-background" id="client-budget" type="number" min="0" step="0.01" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })} placeholder="0" /></div><div className="space-y-1.5"><Label className="text-xs font-semibold">Status</Label><Select value={form.status} onValueChange={(status) => setForm({ ...form, status })}><SelectTrigger className="h-11 bg-background"><SelectValue /></SelectTrigger><SelectContent>{CLIENT_STATUSES.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}</SelectContent></Select></div><div className="space-y-1.5"><Label htmlFor="client-closed-date" className="text-xs font-semibold">Closed date</Label><Input className="h-11 bg-background" id="client-closed-date" type="date" value={form.closed_date} onChange={(e) => setForm({ ...form, closed_date: e.target.value })} /></div></div></section>
-          </div><DialogFooter className="shrink-0 border-t border-border bg-card px-5 py-4 sm:px-7"><Button type="button" variant="outline" onClick={closeDialog}>Cancel</Button><Button type="submit" disabled={saveMutation.isPending}>{saveMutation.isPending ? 'Saving...' : editing ? 'Update client' : 'Create client'}</Button></DialogFooter></form>
+          <div className="shrink-0 border-b border-background/10 bg-foreground px-5 py-5 text-background sm:px-7"><DialogHeader><div className="flex items-start gap-3 pr-8"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background text-foreground"><UserRound className="h-5 w-5" /></div><div><DialogTitle className="font-display text-2xl text-background">{editing ? 'Edit client' : 'Add a client'}</DialogTitle></div></div></DialogHeader></div>
+          <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col"><div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-muted/30 px-5 py-5 sm:px-7">
+            <section className="space-y-4"><div className="border-b border-border pb-3"><h3 className="text-sm font-semibold">Contact details</h3></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div className="space-y-1.5 sm:col-span-2"><Label htmlFor="client-name" className="text-xs font-semibold">Full name <span className="text-foreground">*</span></Label><Input className="h-11 bg-background" id="client-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Client full name" /></div><div className="space-y-1.5"><Label htmlFor="client-email" className="text-xs font-semibold">Email</Label><Input className="h-11 bg-background" id="client-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="client@example.com" /></div><div className="space-y-1.5"><Label htmlFor="client-phone" className="text-xs font-semibold">Phone number</Label><Input className="h-11 bg-background" id="client-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone number" /></div><div className="space-y-1.5 sm:col-span-2"><Label htmlFor="client-address" className="text-xs font-semibold">Address</Label><Input className="h-11 bg-background" id="client-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Client address" /></div></div></section>
+            <section className="space-y-4 border-t border-border pt-5"><div className="border-b border-border pb-3"><h3 className="text-sm font-semibold">Deal profile</h3></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-3"><div className="space-y-1.5"><Label htmlFor="client-budget" className="text-xs font-semibold">Budget</Label><Input className="h-11 bg-background" id="client-budget" type="number" min="0" step="0.01" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })} placeholder="0" /></div><div className="space-y-1.5"><Label className="text-xs font-semibold">Status</Label><Select value={form.status} onValueChange={(status) => setForm({ ...form, status })}><SelectTrigger className="h-11 bg-background"><SelectValue /></SelectTrigger><SelectContent>{CLIENT_STATUSES.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}</SelectContent></Select></div><div className="space-y-1.5"><Label htmlFor="client-closed-date" className="text-xs font-semibold">Closed date</Label><Input className="h-11 bg-background" id="client-closed-date" type="date" value={form.closed_date} onChange={(e) => setForm({ ...form, closed_date: e.target.value })} /></div></div></section>
+          </div><DialogFooter className="shrink-0 gap-2 border-t border-border bg-card px-5 py-4 sm:px-7 sm:space-x-0"><Button type="button" variant="outline" onClick={closeDialog}>Cancel</Button><Button type="submit" disabled={saveMutation.isPending}>{saveMutation.isPending ? 'Saving...' : editing ? 'Update client' : 'Create client'}</Button></DialogFooter></form>
         </DialogContent>
       </Dialog>
 

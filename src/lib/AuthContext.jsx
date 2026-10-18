@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkUserAuth = async () => {
+    setAuthError(null);
     const token = api.auth.getToken();
     if (!token) {
       setIsLoadingAuth(false);
@@ -30,10 +31,18 @@ export const AuthProvider = ({ children }) => {
       api.auth.setUser(currentUser);
       setIsAuthenticated(true);
     } catch (error) {
-      api.auth.logout();
-      setIsAuthenticated(false);
-      if (error.status === 401 || error.status === 403) {
+      if ([401, 403].includes(error?.status)) {
+        api.auth.logout();
+        setUser(null);
+        setIsAuthenticated(false);
         setAuthError({ type: 'auth_required', message: 'Authentication required' });
+      } else {
+        const cachedUser = api.auth.getUser();
+        if (cachedUser) {
+          setUser(cachedUser);
+          setIsAuthenticated(true);
+        }
+        setAuthError({ type: 'connection_error', message: 'Unable to verify your session right now.' });
       }
     } finally {
       setIsLoadingAuth(false);

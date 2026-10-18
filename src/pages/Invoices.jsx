@@ -95,7 +95,8 @@ export default function Invoices() {
     setDialogOpen(true);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (event) => {
+    event.preventDefault();
     if (editing) updateMutation.mutate({ id: editing.id, data: { ...form, total_amount: form.amount + form.tax_amount } });
     else createMutation.mutate(form);
   };
@@ -273,7 +274,7 @@ export default function Invoices() {
 
       {/* Send Email Dialog */}
       <Dialog open={emailDialog} onOpenChange={setEmailDialog}>
-        <DialogContent className="max-w-xl overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
+        <DialogContent className="max-h-[calc(100vh-2rem)] max-w-xl overflow-y-auto rounded-2xl border-0 p-0 shadow-2xl">
           <div className="bg-foreground px-6 py-6 text-background sm:px-7">
             <DialogHeader>
               <div className="flex items-start gap-3 pr-6">
@@ -293,23 +294,47 @@ export default function Invoices() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={dialogOpen} onOpenChange={closeDialog}>
-        <DialogContent className="max-w-lg rounded-2xl">
-          <DialogHeader><DialogTitle className="font-display text-2xl">{editing ? 'Edit Invoice' : 'Create Invoice'}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>Title</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Invoice title" /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Recipient Name</Label><Input value={form.recipient_name} onChange={e => setForm({ ...form, recipient_name: e.target.value })} /></div>
-              <div><Label>Recipient Email</Label><Input value={form.recipient_email} onChange={e => setForm({ ...form, recipient_email: e.target.value })} /></div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div><Label>Amount ($)</Label><Input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: Number(e.target.value) })} /></div>
-              <div><Label>Tax ($)</Label><Input type="number" value={form.tax_amount} onChange={e => setForm({ ...form, tax_amount: Number(e.target.value) })} /></div>
-              <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} /></div>
-            </div>
-            <div><Label>Notes</Label><Textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
+      <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="flex max-h-[calc(100vh-2rem)] max-w-3xl flex-col gap-0 overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
+          <div className="shrink-0 border-b border-background/10 bg-foreground px-5 py-5 text-background sm:px-7">
+            <DialogHeader>
+              <div className="flex items-start gap-3 pr-8">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background text-foreground"><FileText className="h-5 w-5" /></div>
+                <div><DialogTitle className="font-display text-2xl text-background">{editing ? 'Edit invoice' : 'Create an invoice'}</DialogTitle><p className="mt-1 text-sm text-background/70">Set the recipient, amount, and payment details.</p></div>
+              </div>
+            </DialogHeader>
           </div>
-          <DialogFooter><Button onClick={handleSubmit}>{editing ? 'Update' : 'Create'} Invoice</Button></DialogFooter>
+          <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-muted/30 px-5 py-6 sm:px-7">
+              <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+                <div className="mb-4"><h3 className="text-sm font-semibold">Invoice details</h3><p className="text-xs text-muted-foreground">Give this charge a clear reference.</p></div>
+                <div className="space-y-1.5"><Label htmlFor="invoice-title" className="text-xs font-semibold">Invoice title</Label><Input id="invoice-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Invoice title" className="h-11 bg-background" /></div>
+              </section>
+              <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+                <div className="mb-4"><h3 className="text-sm font-semibold">Recipient</h3><p className="text-xs text-muted-foreground">Who should receive this invoice?</p></div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5"><Label htmlFor="invoice-recipient-name" className="text-xs font-semibold">Recipient name</Label><Input id="invoice-recipient-name" value={form.recipient_name} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} placeholder="Client name" className="h-11 bg-background" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="invoice-recipient-email" className="text-xs font-semibold">Recipient email</Label><Input id="invoice-recipient-email" type="email" value={form.recipient_email} onChange={(e) => setForm({ ...form, recipient_email: e.target.value })} placeholder="client@example.com" className="h-11 bg-background" /></div>
+                </div>
+              </section>
+              <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+                <div className="mb-4"><h3 className="text-sm font-semibold">Payment details</h3><p className="text-xs text-muted-foreground">Amount, tax, and due date.</p></div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="space-y-1.5"><Label htmlFor="invoice-amount" className="text-xs font-semibold">Amount ($)</Label><Input id="invoice-amount" type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })} className="h-11 bg-background" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="invoice-tax" className="text-xs font-semibold">Tax ($)</Label><Input id="invoice-tax" type="number" min="0" step="0.01" value={form.tax_amount} onChange={(e) => setForm({ ...form, tax_amount: Number(e.target.value) })} className="h-11 bg-background" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="invoice-due-date" className="text-xs font-semibold">Due date</Label><Input id="invoice-due-date" type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} className="h-11 bg-background" /></div>
+                </div>
+                <div className="mt-4 flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3"><span className="text-sm text-muted-foreground">Total due</span><span className="text-lg font-semibold tabular-nums">${(Number(form.amount || 0) + Number(form.tax_amount || 0)).toLocaleString()}</span></div>
+              </section>
+              <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+                <div className="space-y-1.5"><Label htmlFor="invoice-notes" className="text-xs font-semibold">Notes</Label><Textarea id="invoice-notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Add payment instructions or a note for the recipient." className="resize-none bg-background" /></div>
+              </section>
+            </div>
+            <DialogFooter className="shrink-0 gap-2 border-t border-border bg-card px-5 py-4 sm:px-7 sm:space-x-0">
+              <Button type="button" variant="outline" onClick={closeDialog}>Cancel</Button>
+              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>{createMutation.isPending || updateMutation.isPending ? 'Saving...' : editing ? 'Update invoice' : 'Create invoice'}</Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
