@@ -20,15 +20,16 @@ const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
   { path: "/clients", label: "Clients", icon: Users },
   { path: "/properties", label: "Properties", icon: Building2 },
-  { path: "/expenses", label: "Expenses", icon: Receipt },
+  // { path: "/expenses", label: "Expenses", icon: Receipt },
   { path: "/invoices", label: "Invoices", icon: FileText },
-  { path: "/documents", label: "Documents", icon: FolderOpen },
+  // { path: "/documents", label: "Documents", icon: FolderOpen },
   // { path: "/analytics", label: "Analytics", icon: BarChart2 },
   { path: "/ideas", label: "Ideas & Tickets", icon: Lightbulb },
   { path: "/notepad", label: "Notepad", icon: NotebookPen },
-  { path: "/employees", label: "Employees", icon: UserSquare2 },
+  { path: "/contracts", label: "Contracts", icon: ScrollText },
+  // { path: "/employees", label: "Employees", icon: UserSquare2 },
   // { path: "/chat", label: "Chat", icon: MessageSquare },
-  { path: "/business-plan", label: "Business Plan", icon: BookMarked },
+  // { path: "/business-plan", label: "Business Plan", icon: BookMarked },
   // { path: "/aichat", label: "AI Chat", icon: MessageSquare },
 ];
 
@@ -53,7 +54,7 @@ export default function Sidebar({
 
   const allNavItems = [
     ...navItems,
-    ...(isOwner ? [{ path: "/contracts", label: "Contracts", icon: ScrollText }] : []),
+    ...(isOwner ? [{ path: "/documents", label: "Documents", icon: FolderOpen }] : []),
   ];
 
   const navLink = (item, extra = "") => (
