@@ -4,7 +4,6 @@ import {
   TrendingDown,
   TrendingUp,
   BarChart2,
-  Building2,
   Download,
 } from "lucide-react";
 import {
@@ -32,7 +31,6 @@ export default function OverviewSection({
   allInvoices,
   allExpenses,
 }) {
-  // ✅ TOTAL (no filters)
   const totalRevenue = allInvoices
     .filter((i) => i.status === "paid")
     .reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
@@ -42,17 +40,13 @@ export default function OverviewSection({
     .reduce((s, e) => s + (e.amount || 0), 0);
 
   const netProfit = totalRevenue - totalExpensesAmt;
-
   const profitMargin =
-    totalRevenue > 0
-      ? ((netProfit / totalRevenue) * 100).toFixed(1)
-      : 0;
+    totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : 0;
 
   const pendingRevenue = allInvoices
     .filter((i) => i.status !== "paid")
     .reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
 
-  // 📊 Chart (last 6 months)
   const chartData = useMemo(() => {
     return Array.from({ length: 6 }, (_, i) => {
       const date = subMonths(new Date(), 5 - i);
@@ -63,26 +57,17 @@ export default function OverviewSection({
         .filter(
           (inv) =>
             inv.status === "paid" &&
-            isWithinInterval(new Date(inv.created_date), {
-              start,
-              end,
-            })
+            isWithinInterval(new Date(inv.created_date), { start, end })
         )
-        .reduce(
-          (s, i) => s + (i.total_amount || i.amount || 0),
-          0
-        );
+        .reduce((s, invoice) => s + (invoice.total_amount || invoice.amount || 0), 0);
 
       const exp = allExpenses
         .filter(
-          (exp) =>
-            exp.status === "approved" &&
-            isWithinInterval(new Date(exp.created_date), {
-              start,
-              end,
-            })
+          (expense) =>
+            expense.status === "approved" &&
+            isWithinInterval(new Date(expense.created_date), { start, end })
         )
-        .reduce((s, e) => s + (e.amount || 0), 0);
+        .reduce((s, expense) => s + (expense.amount || 0), 0);
 
       return {
         month: format(date, "MMM"),
@@ -94,30 +79,20 @@ export default function OverviewSection({
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
-
     doc.setFontSize(18);
     doc.text("Financial Report", 20, 20);
 
     const rows = [
       ["Total Revenue", `$${totalRevenue.toLocaleString()}`],
-      [
-        "Total Expenses",
-        `$${totalExpensesAmt.toLocaleString()}`,
-      ],
-      [
-        "Net Profit",
-        `$${netProfit.toLocaleString()}`,
-      ],
+      ["Total Expenses", `$${totalExpensesAmt.toLocaleString()}`],
+      ["Net Profit", `$${netProfit.toLocaleString()}`],
       ["Profit Margin", `${profitMargin}%`],
-      [
-        "Pending Revenue",
-        `$${pendingRevenue.toLocaleString()}`,
-      ],
+      ["Pending Revenue", `$${pendingRevenue.toLocaleString()}`],
     ];
 
     let y = 40;
-    rows.forEach(([k, v]) => {
-      doc.text(`${k}: ${v}`, 20, y);
+    rows.forEach(([label, value]) => {
+      doc.text(`${label}: ${value}`, 20, y);
       y += 10;
     });
 
@@ -126,23 +101,18 @@ export default function OverviewSection({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">
-         Overview 
-        </h1>
+        <h1 className="text-2xl font-bold">Overview</h1>
       </div>
 
-      {/* Export */}
       <button
         onClick={handleExportPDF}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg border"
+        className="flex items-center gap-2 rounded-lg border px-3 py-2"
       >
         <Download size={14} /> Export PDF
       </button>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           icon={<DollarSign />}
           label="Revenue"
@@ -165,8 +135,7 @@ export default function OverviewSection({
         />
       </div>
 
-      {/* Chart */}
-      <div className="border rounded-xl p-5">
+      <div className="rounded-xl border p-5">
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -174,56 +143,32 @@ export default function OverviewSection({
             <YAxis />
             <Tooltip />
             <Legend />
-            <Area
-              dataKey="Revenue"
-              stroke="#22c55e"
-              fill="#22c55e33"
-            />
-            <Area
-              dataKey="Expenses"
-              stroke="#ef4444"
-              fill="#ef444433"
-            />
+            <Area dataKey="Revenue" stroke="#22c55e" fill="#22c55e33" />
+            <Area dataKey="Expenses" stroke="#ef4444" fill="#ef444433" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Companies */}
-      <div className="border rounded-xl p-4">
-        <h2 className="font-semibold mb-3">
-          Companies
-        </h2>
-
-        {companies.map((c) => {
-          const rev = allInvoices
+      <div className="rounded-xl border p-4">
+        <h2 className="mb-3 font-semibold">Companies</h2>
+        {companies.map((company) => {
+          const revenue = allInvoices
             .filter(
-              (i) =>
-                i.status === "paid" &&
-                i.company_id === c.id
+              (invoice) =>
+                invoice.status === "paid" && invoice.company_id === company.id
             )
-            .reduce(
-              (s, i) =>
-                s + (i.total_amount || i.amount || 0),
-              0
-            );
-
-          const exp = allExpenses
+            .reduce((sum, invoice) => sum + (invoice.total_amount || invoice.amount || 0), 0);
+          const expenses = allExpenses
             .filter(
-              (e) =>
-                e.status === "approved" &&
-                e.company_id === c.id
+              (expense) =>
+                expense.status === "approved" && expense.company_id === company.id
             )
-            .reduce((s, e) => s + (e.amount || 0), 0);
+            .reduce((sum, expense) => sum + (expense.amount || 0), 0);
 
           return (
-            <div
-              key={c.id}
-              className="flex justify-between py-2"
-            >
-              <span>{c.name}</span>
-              <span>
-                ${ (rev - exp).toLocaleString() }
-              </span>
+            <div key={company.id} className="flex justify-between py-2">
+              <span>{company.name}</span>
+              <span>${(revenue - expenses).toLocaleString()}</span>
             </div>
           );
         })}
@@ -234,14 +179,12 @@ export default function OverviewSection({
 
 function StatCard({ icon, label, value }) {
   return (
-    <div className="border rounded-xl p-4">
+    <div className="rounded-xl border p-4">
       <div className="flex items-center gap-2">
         {icon}
         <span className="text-xs">{label}</span>
       </div>
-      <p className="text-lg font-bold mt-2">
-        {value}
-      </p>
+      <p className="mt-2 text-lg font-bold">{value}</p>
     </div>
   );
 }

@@ -176,6 +176,9 @@ export const api = {
     login: (email, password) => request('POST', '/api/auth/login', { email, password }),
     register: (data) => request('POST', '/api/auth/register', data),
     verifyOtp: (email, otp) => request('POST', '/api/auth/verify-otp', { email, otp }),
+    forgotPassword: (email) => request('POST', '/api/auth/forgot-password', { email }),
+    resetPassword: (email, otp, password) =>
+      request('POST', '/api/auth/reset-password', { email, otp, password }),
     logout: () => {
       localStorage.removeItem('token');
       localStorage.removeItem(USER_KEY);

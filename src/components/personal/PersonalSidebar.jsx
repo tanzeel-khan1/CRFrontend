@@ -29,7 +29,6 @@ const navItems = [
   { id: "companies", label: "Companies", icon: Building2 },
   { id: "documents", label: "Documents", icon: FolderOpen },
   { id: "profile", label: "Profile", icon: LayoutDashboard },
-
 ];
 
 function CompanySwitcher({

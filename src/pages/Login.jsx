@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { ArrowLeft, KeyRound, Mail } from "lucide-react";
 // import { signInWithPopup } from "firebase/auth";
 // import { auth, provider } from "../firebase";
 import axios from "axios";
@@ -25,6 +26,7 @@ export default function Login() {
     email: inviteEmail,
     password: "",
   });
+  const [resetOtp, setResetOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -39,6 +41,8 @@ export default function Login() {
   }, [searchParams]);
 
   const isLogin = mode === "login";
+  const isRegister = mode === "register";
+  const isPasswordReset = mode === "reset-password";
 
   const updateForm = (key, value) => {
     setForm((prev) => ({
@@ -48,34 +52,41 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    if (isLogin) {
-      const result = await api.auth.login(form.email, form.password);
+    try {
+      if (isLogin) {
+        const result = await api.auth.login(form.email, form.password);
 
-      api.auth.saveSession(result);
-      await checkUserAuth();
+        api.auth.saveSession(result);
+        await checkUserAuth();
 
-      navigate("/personal");
-    } 
-    else {
-      await api.auth.register(form);
+        navigate("/personal");
+      } else if (isRegister) {
+        await api.auth.register(form);
 
-      toast.success("OTP sent to email");
-
-      // ✅ ONLY redirect to OTP page
-      navigate("/verify-otp", {
-        state: { email: form.email },
-      });
+        toast.success("OTP sent to email");
+        navigate("/verify-otp", {
+          state: { email: form.email },
+        });
+      } else if (mode === "forgot-password") {
+        await api.auth.forgotPassword(form.email);
+        setMode("reset-password");
+        toast.success("If an account exists, a reset code has been sent to its email.");
+      } else {
+        await api.auth.resetPassword(form.email, resetOtp, form.password);
+        toast.success("Password reset successfully. Please sign in.");
+        setForm((prev) => ({ ...prev, password: "" }));
+        setResetOtp("");
+        setMode("login");
+      }
+    } catch (err) {
+      toast.error(err.message || "Authentication failed");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    toast.error(err.message || "Authentication failed");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
   // const handleSubmit = async (e) => {
   //   e.preventDefault();
   //   setLoading(true);
@@ -187,18 +198,44 @@ export default function Login() {
               </div>
 
               <div className="mb-8">
-                <p className="eyebrow mb-2">{isLogin ? "Member access" : "Join Ranvola"}</p>
-                <h1 className="font-display text-3xl font-normal tracking-tight sm:text-4xl">
-                  {isLogin ? "Welcome back" : "Create your account"}
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {isLogin
-                    ? "Sign in to continue to your dashboard."
-                    : "Fill the details below to get started."}
+                <p className="eyebrow mb-2">
+                  {isLogin ? "Member access" : isRegister ? "Join Ranvola" : "Account recovery"}
                 </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h1 className="font-display text-3xl font-normal tracking-tight sm:text-4xl">
+                      {isLogin
+                        ? "Welcome back"
+                        : isRegister
+                          ? "Create your account"
+                          : mode === "forgot-password"
+                            ? "Forgot password?"
+                            : "Reset your password"}
+                    </h1>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      {isLogin
+                        ? "Sign in to continue to your dashboard."
+                        : isRegister
+                          ? "Fill the details below to get started."
+                          : mode === "forgot-password"
+                            ? "Enter your account email and we’ll send you a reset code."
+                            : "Enter the code from your email and choose a new password."}
+                    </p>
+                  </div>
+                  {!isLogin && !isRegister && (
+                    <button
+                      type="button"
+                      onClick={() => setMode("login")}
+                      className="mt-1 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      <span className="hidden sm:inline">Sign in</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <div className="mb-6 grid grid-cols-2 rounded-xl bg-muted p-1 border border-border/60">
+              {(isLogin || isRegister) && <div className="mb-6 grid grid-cols-2 rounded-xl bg-muted p-1 border border-border/60">
                 <button
                   type="button"
                   onClick={() => setMode("login")}
@@ -222,10 +259,10 @@ export default function Login() {
                 >
                   Sign up
                 </button>
-              </div>
+              </div>}
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                {!isLogin && (
+                {isRegister && (
                   <div className="space-y-2">
                     <Label htmlFor="full_name">Full name</Label>
                     <Input
@@ -241,46 +278,126 @@ export default function Login() {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => updateForm("email", e.target.value)}
-                    required
-                    disabled={loading}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    className="h-11 rounded-xl"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="relative">
+                {!isPasswordReset && (
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email address</Label>
                     <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={form.password}
-                      onChange={(e) => updateForm("password", e.target.value)}
+                      id="email"
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => updateForm("email", e.target.value)}
                       required
                       disabled={loading}
-                      placeholder="••••••••"
-                      autoComplete={
-                        isLogin ? "current-password" : "new-password"
-                      }
-                      className="h-11 rounded-xl pr-20"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      className="h-11 rounded-xl"
                     />
+                  </div>
+                )}
 
+                {isPasswordReset && (
+                  <>
+                    <div className="flex items-start gap-3 rounded-xl border border-border/70 bg-muted/60 p-3.5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-card text-foreground shadow-sm">
+                        <Mail className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Reset code sent to</p>
+                        <p className="truncate text-sm font-medium text-foreground">{form.email}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setResetOtp("");
+                          setMode("forgot-password");
+                        }}
+                        className="shrink-0 text-xs font-semibold text-foreground underline-offset-4 hover:underline"
+                      >
+                        Change
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-otp">6-digit reset code</Label>
+                      <div className="relative">
+                        <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="reset-otp"
+                          value={resetOtp}
+                          onChange={(e) => setResetOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          placeholder="000000"
+                          maxLength={6}
+                          required
+                          disabled={loading}
+                          className="h-11 rounded-xl pl-10 tracking-[0.2em]"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Code expires in 5 minutes.{" "}
+                        <button
+                          type="button"
+                          disabled={loading}
+                          onClick={async () => {
+                            setLoading(true);
+                            try {
+                              await api.auth.forgotPassword(form.email);
+                              setResetOtp("");
+                              toast.success("If an account exists, a new reset code has been sent.");
+                            } catch (err) {
+                              toast.error(err.message || "Could not resend the reset code");
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          className="font-semibold text-foreground underline-offset-4 hover:underline disabled:opacity-50"
+                        >
+                          Resend code
+                        </button>
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {(isLogin || isRegister || isPasswordReset) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="password">{isPasswordReset ? "New password" : "Password"}</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={form.password}
+                        onChange={(e) => updateForm("password", e.target.value)}
+                        required
+                        minLength={isLogin ? undefined : 6}
+                        disabled={loading}
+                        placeholder="••••••••"
+                        autoComplete={isLogin ? "current-password" : "new-password"}
+                        className="h-11 rounded-xl pr-20"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {isLogin && (
+                  <div className="-mt-2 text-right">
                     <button
                       type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground hover:text-foreground"
+                      onClick={() => setMode("forgot-password")}
+                      className="rounded-sm text-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      {showPassword ? "Hide" : "Show"}
+                      Forgot password?
                     </button>
                   </div>
-                </div>
+                )}
 
                 <Button
                   type="submit"
@@ -291,22 +408,26 @@ export default function Login() {
                     ? "Please wait..."
                     : isLogin
                       ? "Sign in"
-                      : "Create account"}
+                      : isRegister
+                        ? "Create account"
+                        : mode === "forgot-password"
+                          ? "Send reset code"
+                          : "Reset password"}
                 </Button>
               </form>
 
-              <p className="mt-6 text-center text-sm text-muted-foreground">
-                {isLogin
-                  ? "Don't have an account?"
-                  : "Already have an account?"}{" "}
-                <button
-                  type="button"
-                  onClick={() => setMode(isLogin ? "register" : "login")}
-                  className="font-medium text-foreground hover:underline"
-                >
-                  {isLogin ? "Create one" : "Sign in"}
-                </button>
-              </p>
+              {(isLogin || isRegister) && (
+                <p className="mt-6 text-center text-sm text-muted-foreground">
+                  {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setMode(isLogin ? "register" : "login")}
+                    className="font-medium text-foreground hover:underline"
+                  >
+                    {isLogin ? "Create one" : "Sign in"}
+                  </button>
+                </p>
+              )}
             </div>
           </div>
         </div>
