@@ -11,7 +11,7 @@ const sendMessage = async (req, res) => {
 };
 
 const deleteMessage = async (req, res) => {
-  const message = await ChatMessage.findByIdAndDelete(req.params.id);
+  const message = await ChatMessage.softDeleteById(req.params.id, req.user.email);
   if (!message) return res.status(404).json({ message: 'Message not found' });
   res.json({ message: 'Message deleted' });
 };

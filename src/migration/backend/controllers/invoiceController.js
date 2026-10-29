@@ -17,7 +17,7 @@ const updateInvoice = async (req, res) => {
 };
 
 const deleteInvoice = async (req, res) => {
-  const invoice = await Invoice.findByIdAndDelete(req.params.id);
+  const invoice = await Invoice.softDeleteById(req.params.id, req.user.email);
   if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
   res.json({ message: 'Invoice deleted' });
 };

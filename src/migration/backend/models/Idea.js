@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDelete');
 
 const ideaSchema = new mongoose.Schema({
   company_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
@@ -11,5 +12,7 @@ const ideaSchema = new mongoose.Schema({
   created_by: { type: String },
   created_by_name: { type: String },
 }, { timestamps: true });
+
+ideaSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('Idea', ideaSchema);

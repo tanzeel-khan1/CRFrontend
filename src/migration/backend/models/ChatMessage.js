@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDelete');
 
 const chatMessageSchema = new mongoose.Schema({
   company_id: { type: String, required: true }, // can be a company id or a DM room key
@@ -17,5 +18,7 @@ const chatMessageSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 chatMessageSchema.index({ company_id: 1, createdAt: -1 });
+
+chatMessageSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('ChatMessage', chatMessageSchema);

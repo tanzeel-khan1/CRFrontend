@@ -17,7 +17,7 @@ const updatePassword = async (req, res) => {
 };
 
 const deletePassword = async (req, res) => {
-  const password = await Password.findByIdAndDelete(req.params.id);
+  const password = await Password.softDeleteById(req.params.id, req.user.email);
   if (!password) return res.status(404).json({ message: 'Password not found' });
   res.json({ message: 'Password deleted' });
 };

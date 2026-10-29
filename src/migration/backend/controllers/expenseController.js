@@ -17,7 +17,7 @@ const updateExpense = async (req, res) => {
 };
 
 const deleteExpense = async (req, res) => {
-  const expense = await Expense.findByIdAndDelete(req.params.id);
+  const expense = await Expense.softDeleteById(req.params.id, req.user.email);
   if (!expense) return res.status(404).json({ message: 'Expense not found' });
   res.json({ message: 'Expense deleted' });
 };

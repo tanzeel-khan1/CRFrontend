@@ -17,6 +17,7 @@ const activityRoutes = require('./routes/activityRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const documentRoutes = require('./routes/documentRoutes');
 const passwordRoutes = require('./routes/passwordRoutes');
+const trashRoutes = require('./routes/trashRoutes');
 
 dotenv.config();
 connectDB();
@@ -46,6 +47,9 @@ app.use('/api/companies/:companyId/passwords', passwordRoutes);
 
 // Chat (room-based, room = company_id)
 app.use('/api/chat', chatRoutes);
+
+// Trash (restore / permanently delete soft-deleted items)
+app.use('/api/trash', trashRoutes);
 
 // Personal notes (no companyId)
 app.use('/api/notes', noteRoutes);

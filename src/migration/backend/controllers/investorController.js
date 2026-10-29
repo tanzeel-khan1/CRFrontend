@@ -17,7 +17,7 @@ const updateInvestor = async (req, res) => {
 };
 
 const deleteInvestor = async (req, res) => {
-  const investor = await Investor.findByIdAndDelete(req.params.id);
+  const investor = await Investor.softDeleteById(req.params.id, req.user.email);
   if (!investor) return res.status(404).json({ message: 'Investor not found' });
   res.json({ message: 'Investor deleted' });
 };
