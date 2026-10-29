@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDelete');
 
 const ideaCommentSchema = new mongoose.Schema({
   idea_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Idea', required: true },
@@ -7,5 +8,7 @@ const ideaCommentSchema = new mongoose.Schema({
   author_name: { type: String },
   author_email: { type: String },
 }, { timestamps: true });
+
+ideaCommentSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('IdeaComment', ideaCommentSchema);

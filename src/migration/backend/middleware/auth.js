@@ -20,4 +20,6 @@ const adminOnly = (req, res, next) => {
   res.status(403).json({ message: 'Admin access required' });
 };
 
-module.exports = { protect, adminOnly };
+module.exports = protect;
+module.exports.protect = protect;
+module.exports.adminOnly = adminOnly;

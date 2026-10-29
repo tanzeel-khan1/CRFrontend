@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDelete');
 
 const expenseSchema = new mongoose.Schema({
   company_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
@@ -16,5 +17,7 @@ const expenseSchema = new mongoose.Schema({
   recurring: { type: Boolean, default: false },
   created_by: { type: String },
 }, { timestamps: true });
+
+expenseSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('Expense', expenseSchema);

@@ -12,8 +12,12 @@ const createSection = async (req, res) => {
 };
 
 const deleteSection = async (req, res) => {
-  await DocSection.findByIdAndDelete(req.params.id);
-  await Document.deleteMany({ section_id: req.params.id });
+  const section = await DocSection.softDeleteById(req.params.id, req.user.email);
+  if (!section) return res.status(404).json({ message: 'Section not found' });
+  await Document.updateMany(
+    { section_id: req.params.id },
+    { is_deleted: true, deleted_at: new Date(), deleted_by: req.user.email }
+  );
   res.json({ message: 'Section deleted' });
 };
 
@@ -35,7 +39,7 @@ const updateDocument = async (req, res) => {
 };
 
 const deleteDocument = async (req, res) => {
-  const doc = await Document.findByIdAndDelete(req.params.id);
+  const doc = await Document.softDeleteById(req.params.id, req.user.email);
   if (!doc) return res.status(404).json({ message: 'Document not found' });
   res.json({ message: 'Document deleted' });
 };

@@ -17,7 +17,7 @@ const updateEmployee = async (req, res) => {
 };
 
 const deleteEmployee = async (req, res) => {
-  const employee = await Employee.findByIdAndDelete(req.params.id);
+  const employee = await Employee.softDeleteById(req.params.id, req.user.email);
   if (!employee) return res.status(404).json({ message: 'Employee not found' });
   res.json({ message: 'Employee deleted' });
 };

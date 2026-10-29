@@ -20,7 +20,7 @@ const updateNote = async (req, res) => {
 };
 
 const deleteNote = async (req, res) => {
-  const note = await Note.findByIdAndDelete(req.params.id);
+  const note = await Note.softDeleteById(req.params.id, req.user.email);
   if (!note) return res.status(404).json({ message: 'Note not found' });
   res.json({ message: 'Note deleted' });
 };

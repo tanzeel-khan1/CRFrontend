@@ -258,7 +258,13 @@ export const api = {
       Hpc: entity('hpcs'),
 
   },
-  
+
+  trash: {
+    list: () => request('GET', '/api/trash'),
+    restore: (resource, id) => request('POST', `/api/trash/${resource}/${id}/restore`),
+    purge: (resource, id) => request('DELETE', `/api/trash/${resource}/${id}`),
+  },
+
   invitations: {
     getMine: () => request('GET', '/api/invitations'),
     accept: (id, contractAgreed) => request('PUT', `/api/invitations/${id}/accept`, { contract_agreed: contractAgreed }),
@@ -278,6 +284,8 @@ export const api = {
 };
 
 export default api;
+
+
 
 
 

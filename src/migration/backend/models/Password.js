@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDelete');
 
 const passwordSchema = new mongoose.Schema({
   company_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
@@ -11,5 +12,7 @@ const passwordSchema = new mongoose.Schema({
   is_weak: { type: Boolean, default: false },
   created_by: { type: String },
 }, { timestamps: true });
+
+passwordSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('Password', passwordSchema);

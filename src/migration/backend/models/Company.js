@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDeletePlugin = require('../utils/softDelete');
 
 const companySchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
@@ -14,5 +15,7 @@ const companySchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive', 'archived'], default: 'active' },
   created_by: { type: String }, // user email
 }, { timestamps: true });
+
+companySchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('Company', companySchema);

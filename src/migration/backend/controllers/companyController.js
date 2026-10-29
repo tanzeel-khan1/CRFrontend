@@ -23,7 +23,7 @@ const updateCompany = async (req, res) => {
 };
 
 const deleteCompany = async (req, res) => {
-  const company = await Company.findByIdAndDelete(req.params.id);
+  const company = await Company.softDeleteById(req.params.id, req.user.email);
   if (!company) return res.status(404).json({ message: 'Company not found' });
   res.json({ message: 'Company deleted' });
 };

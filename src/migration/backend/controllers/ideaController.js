@@ -18,9 +18,12 @@ const updateIdea = async (req, res) => {
 };
 
 const deleteIdea = async (req, res) => {
-  const idea = await Idea.findByIdAndDelete(req.params.id);
+  const idea = await Idea.softDeleteById(req.params.id, req.user.email);
   if (!idea) return res.status(404).json({ message: 'Idea not found' });
-  await IdeaComment.deleteMany({ idea_id: req.params.id });
+  await IdeaComment.updateMany(
+    { idea_id: req.params.id },
+    { is_deleted: true, deleted_at: new Date(), deleted_by: req.user.email }
+  );
   res.json({ message: 'Idea deleted' });
 };
 
