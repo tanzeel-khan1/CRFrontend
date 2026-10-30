@@ -1,15 +1,6 @@
 # Ranvola Frontend
 React + Vite frontend for Ranvola.
 
-## Setup
-
-```bash
-cd frontend
-npm install
-cp .env.example .env
-npm run dev
-```
-
 Runs on http://localhost:5173. API calls are proxied to http://localhost:5000 (the backend).
 
 ## Environment Variables
