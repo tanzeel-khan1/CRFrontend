@@ -33,6 +33,7 @@ import AIChat from './components/AIChat.jsx';
 import Verifyotp from './pages/Verifyotp.jsx';
 import Event from './pages/Event.jsx';
 import Hpc from './pages/Hpc';
+import Trash from './pages/Trash';
 import { useEffect } from 'react';
 
 const AuthenticatedApp = () => {
@@ -99,6 +100,7 @@ const AuthenticatedApp = () => {
 
         <Route path="/companies/new" element={<Navigate to="/personal/companies/new" replace />} />
         <Route path="/hpc" element={<Hpc />} />
+        <Route path="/trash" element={<Trash />} />
       </Route>
       <Route path="/personal" element={isAuthenticated ? <PersonalHome /> : <Navigate to="/login" />} />
       <Route path="/personal/*" element={isAuthenticated ? <PersonalLayout /> : <Navigate to="/login" />}>

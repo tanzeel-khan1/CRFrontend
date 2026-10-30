@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Building2, Users, Receipt, FileText,
   FolderOpen, Settings, ChevronDown, Plus,
   Lightbulb, NotebookPen, UserSquare2, Home, BookMarked, ScrollText,
-  User, PanelLeft
+  User, PanelLeft, Trash2
 } from "lucide-react";
 import { api } from "@/api/apiClient";
 import {
@@ -27,6 +27,7 @@ const navItems = [
   { path: "/ideas", label: "Ideas & Tickets", icon: Lightbulb },
   { path: "/notepad", label: "Notepad", icon: NotebookPen },
   { path: "/contracts", label: "Contracts", icon: ScrollText },
+  { path: "/trash", label: "Trash", icon: Trash2 },
   // { path: "/employees", label: "Employees", icon: UserSquare2 },
   // { path: "/chat", label: "Chat", icon: MessageSquare },
   // { path: "/business-plan", label: "Business Plan", icon: BookMarked },
