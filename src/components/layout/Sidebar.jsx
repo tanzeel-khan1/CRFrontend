@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Building2, Users, Receipt, FileText,
   FolderOpen, Settings, ChevronDown, Plus,
   Lightbulb, NotebookPen, UserSquare2, Home, BookMarked, ScrollText,
-  User, PanelLeft, Trash2
+  User, PanelLeft, ShieldCheck, Bell
 } from "lucide-react";
 import { api } from "@/api/apiClient";
 import {
@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
   { path: "/clients", label: "Clients", icon: Users },
+  { path: "/activity", label: "Activity Log", icon: Bell },
   { path: "/properties", label: "Properties", icon: Building2 },
   // { path: "/expenses", label: "Expenses", icon: Receipt },
   { path: "/invoices", label: "Invoices", icon: FileText },
@@ -27,7 +28,6 @@ const navItems = [
   { path: "/ideas", label: "Ideas & Tickets", icon: Lightbulb },
   { path: "/notepad", label: "Notepad", icon: NotebookPen },
   { path: "/contracts", label: "Contracts", icon: ScrollText },
-  { path: "/trash", label: "Trash", icon: Trash2 },
   // { path: "/employees", label: "Employees", icon: UserSquare2 },
   // { path: "/chat", label: "Chat", icon: MessageSquare },
   // { path: "/business-plan", label: "Business Plan", icon: BookMarked },
@@ -56,6 +56,7 @@ export default function Sidebar({
   const allNavItems = [
     ...navItems,
     ...(isOwner ? [{ path: "/documents", label: "Documents", icon: FolderOpen }] : []),
+    ...(currentUser?.role === "admin" ? [{ path: "/admin/feedback", label: "Feedback review", icon: ShieldCheck }] : []),
   ];
 
   const navLink = (item, extra = "") => (

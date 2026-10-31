@@ -15,6 +15,8 @@ import TableSkeleton from '@/components/ui/TableSkeleton';
 
 const RESOURCE_META = {
   companies: { label: 'Company', icon: Building2 },
+  clients: { label: 'Client', icon: Users },
+  properties: { label: 'Property', icon: Building2 },
   expenses: { label: 'Expense', icon: Receipt },
   invoices: { label: 'Invoice', icon: FileText },
   investors: { label: 'Investor', icon: Users },
@@ -26,6 +28,14 @@ const RESOURCE_META = {
   'doc-sections': { label: 'Document Section', icon: Folder },
   passwords: { label: 'Password', icon: KeyRound },
   chat: { label: 'Chat Message', icon: MessageSquare },
+  events: { label: 'Event', icon: FileText },
+  steps: { label: 'Stepper Item', icon: FileText },
+  contracts: { label: 'Contract', icon: FileText },
+  goals: { label: 'Goal', icon: FileText },
+  hpcs: { label: 'HPC Initiative', icon: FileText },
+  'business-plan': { label: 'Business Plan Section', icon: FileText },
+  activities: { label: 'Activity', icon: FileText },
+  feedback: { label: 'Client Feedback', icon: MessageSquare },
 };
 
 export default function Trash() {

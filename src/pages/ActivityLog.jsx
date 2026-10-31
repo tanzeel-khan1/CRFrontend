@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/apiClient';
 import { motion } from 'framer-motion';
-import { Receipt, FileText, Users, FolderOpen, DollarSign, CheckCircle, Shield } from 'lucide-react';
+import { Receipt, FileText, Users, FolderOpen, DollarSign, CheckCircle, Shield, Star } from 'lucide-react';
 import TableSkeleton from '@/components/ui/TableSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -16,6 +16,7 @@ const iconMap = {
   document: FolderOpen,
   payout: DollarSign,
   security: Shield,
+  feedback: Star,
 };
 
 export default function ActivityLog() {

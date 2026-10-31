@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Plus,
   Mail,
+  MessageSquareText,
 } from "lucide-react";
 import { api } from "@/api/apiClient";
 import LogoutConfirmDialog from "@/components/auth/LogoutConfirmDialog";
@@ -27,6 +28,7 @@ const navItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "financials", label: "Financials", icon: TrendingUp },
   { id: "companies", label: "Companies", icon: Building2 },
+  { id: "feedback", label: "Client feedback", icon: MessageSquareText },
   { id: "documents", label: "Documents", icon: FolderOpen },
   { id: "profile", label: "Profile", icon: LayoutDashboard },
 ];

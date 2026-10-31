@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "lint": "eslint . --quiet"
-},
+    "dev": "node init && vite",
+    "build": "node init && vite build",
+    "lint": "eslint . --quiet"
+  },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.17.6",
     "@hello-pangea/dnd": "^17.0.0",

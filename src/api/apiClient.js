@@ -220,6 +220,23 @@ export const api = {
     getSubscription: (userId) =>
       request("GET", `/api/billing/subscription/${userId}`),
   },
+  feedback: {
+    getSubmissionForm: (token) => request('GET', `/api/feedback/public/${token}`),
+    submit: (token, data) => request('POST', `/api/feedback/public/${token}`, data),
+    getPublicCompanyFeedback: (companyId) =>
+      request('GET', `/api/feedback/public/company/${companyId}`),
+    getCompanyStatus: (companyId) =>
+      request('GET', `/api/feedback/company/status?company_id=${encodeURIComponent(companyId)}`),
+    getMine: () => request('GET', '/api/feedback/mine'),
+    getPending: () => request('GET', '/api/feedback/admin/pending'),
+    updateStatus: (id, status) =>
+      request('PATCH', `/api/feedback/admin/${id}/status`, { status }),
+  },
+  trash: {
+    list: () => request('GET', '/api/trash'),
+    restore: (resource, id) => request('POST', `/api/trash/${resource}/${id}/restore`),
+    purge: (resource, id) => request('DELETE', `/api/trash/${resource}/${id}`),
+  },
 
   entities: {
     Company:     entity('companies'),
@@ -241,7 +258,6 @@ export const api = {
         `/api/events/company/${companyId}`
       ),
   },
-
     Activity: {
   ...entity('activities'),
   deleteCompanyActivities: (companyId) =>

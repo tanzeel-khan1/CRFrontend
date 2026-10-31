@@ -11,6 +11,7 @@ import CompaniesSection from '@/components/personal/CompaniesSection';
 import NotesSection from '@/components/personal/NotesSection';
 import PersonalDocuments from '@/components/personal/PersonalDocuments';
 import PersonalChat from '@/components/personal/PersonalChat';
+import PersonalFeedback from '@/components/personal/PersonalFeedback';
 import Profile from '@/components/personal/Profile';
 import PersonalNavbar from '../pages/PersonalNavbar';
 import InvitationModal from '@/components/invitations/InvitationModal';
@@ -172,6 +173,8 @@ useEffect(() => {
           />
           
         );
+      case 'feedback':
+        return <PersonalFeedback />;
       case 'profile':
   return <Profile currentUser={currentUser} />;
       case 'notes':

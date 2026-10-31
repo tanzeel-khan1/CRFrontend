@@ -42,6 +42,11 @@ frontend/src/
 
 ## Company Workspace Modules
 
+Client feedback can be collected through a client-specific public link. Submissions
+are reviewed by a platform administrator before appearing on the company's public
+reviews page. Configure `PLATFORM_ADMIN_EMAILS` on the backend, or assign the
+`admin` role to a platform administrator account, to enable moderation access.
+
 The frontend now includes an HPC module in the company workspace:
 - Create HPC initiatives for the selected company
 - Edit or delete existing HPC records
