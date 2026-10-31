@@ -34,10 +34,13 @@ import Verifyotp from './pages/Verifyotp.jsx';
 import Event from './pages/Event.jsx';
 import Hpc from './pages/Hpc';
 import Trash from './pages/Trash';
+import FeedbackSubmission from './pages/FeedbackSubmission';
+import PublicReviews from './pages/PublicReviews';
+import AdminFeedback from './pages/AdminFeedback';
 import { useEffect } from 'react';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isAuthenticated, authChecked, authError, checkUserAuth } = useAuth();
+  const { isLoadingAuth, isAuthenticated, authChecked, authError, checkUserAuth, user } = useAuth();
 
   if (isLoadingAuth || !authChecked) {
     return (
@@ -76,7 +79,9 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
-              <Route path="/verify-otp" element={<Verifyotp />} />
+      <Route path="/verify-otp" element={<Verifyotp />} />
+      <Route path="/feedback/:token" element={<FeedbackSubmission />} />
+      <Route path="/reviews/:companyId" element={<PublicReviews />} />
 
       <Route element={isAuthenticated ? <AppLayout /> : <Navigate to="/login" />}>
         <Route path="/" element={<Dashboard />} />
@@ -101,6 +106,7 @@ const AuthenticatedApp = () => {
         <Route path="/companies/new" element={<Navigate to="/personal/companies/new" replace />} />
         <Route path="/hpc" element={<Hpc />} />
         <Route path="/trash" element={<Trash />} />
+        <Route path="/admin/feedback" element={user?.role === 'admin' ? <AdminFeedback /> : <Navigate to="/" replace />} />
       </Route>
       <Route path="/personal" element={isAuthenticated ? <PersonalHome /> : <Navigate to="/login" />} />
       <Route path="/personal/*" element={isAuthenticated ? <PersonalLayout /> : <Navigate to="/login" />}>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { CalendarDays, CheckCircle2, DollarSign, Mail, MapPin, Pencil, Phone, Plus, RefreshCw, Search, Sparkles, Trash2, UserRound } from 'lucide-react';
+import { CalendarDays, CheckCircle2, ClipboardCopy, DollarSign, Mail, MapPin, Pencil, Phone, Plus, RefreshCw, Search, Sparkles, Star, Trash2, UserRound } from 'lucide-react';
 import { api } from '@/api/apiClient';
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,24 @@ export default function Clients() {
     initialData: [],
     meta: { handledInComponent: true },
   });
+  const { data: feedbackStatuses = [] } = useQuery({
+    queryKey: ['feedback-status', companyId],
+    queryFn: () => api.feedback.getCompanyStatus(companyId),
+    enabled: !!companyId,
+    refetchInterval: 30000,
+  });
+  const feedbackStatusByClient = new Map(
+    feedbackStatuses.map((feedback) => [feedback.client_id, feedback.status])
+  );
+  const pendingFeedbackCount = feedbackStatuses.filter((feedback) => feedback.status === 'pending').length;
+  const copyLink = async (url, label) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error('Unable to copy link. Please copy it from your browser address bar.');
+    }
+  };
 
   const visibleClients = clients.filter((client) => {
     const query = search.trim().toLowerCase();
@@ -118,13 +136,18 @@ export default function Clients() {
   return (
     <div className="space-y-6 pb-8">
       <section className="page-hero">
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-background/55"><Sparkles className="h-3.5 w-3.5" /> Client pipeline</div><h1 className="font-display text-4xl tracking-tight sm:text-5xl">Clients</h1><p className="mt-2 max-w-lg text-sm leading-6 text-background/70">Keep every relationship moving from first contact to closing.</p></div><Button onClick={openAdd} variant="secondary" className="w-full gap-2 sm:w-auto"><Plus className="h-4 w-4" /> Add client</Button></div>
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-background/55"><Sparkles className="h-3.5 w-3.5" /> Client pipeline</div><h1 className="font-display text-4xl tracking-tight sm:text-5xl">Clients</h1><p className="mt-2 max-w-lg text-sm leading-6 text-background/70">Keep every relationship moving from first contact to closing.</p></div><div className="flex flex-col gap-2 sm:flex-row"><Button onClick={() => companyId && copyLink(`${window.location.origin}/reviews/${companyId}`, 'Public feedback page link')} disabled={!companyId} variant="secondary" className="w-full gap-2 sm:w-auto"><ClipboardCopy className="h-4 w-4" /> Copy public page link</Button><Button onClick={openAdd} variant="secondary" className="w-full gap-2 sm:w-auto"><Plus className="h-4 w-4" /> Add client</Button></div></div>
         <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full border-[24px] border-background/10" />
       </section>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[{ label: 'Total clients', value: stats.total, icon: UserRound }, { label: 'Active pipeline', value: stats.active, icon: CheckCircle2 }, { label: 'Closed deals', value: stats.closed, icon: Sparkles }, { label: 'Pipeline budget', value: stats.pipeline.toLocaleString(), icon: DollarSign }].map(({ label, value, icon: Icon }) => <div key={label} className="stat-tile"><div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background"><Icon className="h-4 w-4" /></div><p className="text-xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{label}</p></div>)}
       </section>
+      {pendingFeedbackCount > 0 && (
+        <div role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
+          {pendingFeedbackCount} client {pendingFeedbackCount === 1 ? 'review is' : 'reviews are'} awaiting platform approval. You can also find the notification in your Activity Log.
+        </div>
+      )}
 
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-2 shadow-sm sm:p-3 lg:flex-row lg:items-center">
         <div className="relative flex-1">
@@ -173,6 +196,7 @@ export default function Clients() {
           {visibleClients.map((client, i) => {
             const status = client.status || 'New';
             const initials = client.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'CL';
+            const feedbackStatus = feedbackStatusByClient.get(clientId(client));
             return (
               <article key={clientId(client)} className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                 <div className="flex items-start justify-between gap-3">
@@ -228,6 +252,22 @@ export default function Clients() {
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => copyLink(`${window.location.origin}/feedback/${client.feedback_token}`, 'Client feedback link')}
+                    disabled={!client.feedback_token}
+                  >
+                    <Star className="h-3.5 w-3.5" /> Copy review link
+                  </Button>
+                  {feedbackStatus && (
+                    <Badge variant="outline" className="capitalize">
+                      {feedbackStatus === 'pending' ? 'Under review' : feedbackStatus}
+                    </Badge>
+                  )}
                 </div>
               </article>
             );
