@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/api/apiClient';
@@ -23,14 +23,27 @@ export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [activeCompany, setActiveCompany] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => api.auth.getUser());
+  const [userLoadError, setUserLoadError] = useState('');
   const [showInvitations, setShowInvitations] = useState(false);
   const navigate = useNavigate();
   const isDesktop = useIsDesktop();
 
-  useEffect(() => {
-    api.auth.me().then(setCurrentUser).catch(() => {});
+  const loadCurrentUser = useCallback(async () => {
+    setUserLoadError('');
+    try {
+      const user = await api.auth.me();
+      setCurrentUser(user);
+      api.auth.setUser(user);
+    } catch (error) {
+      setCurrentUser(api.auth.getUser());
+      setUserLoadError(error.message || 'Unable to refresh your account details.');
+    }
   }, []);
+
+  useEffect(() => {
+    loadCurrentUser();
+  }, [loadCurrentUser]);
 
   const { data: companies = [], isLoading: companiesLoading } = useQuery({
     queryKey: ['companies', currentUser?.email],
@@ -136,6 +149,14 @@ export default function AppLayout() {
         className="relative z-10 pt-14 min-h-screen transition-all duration-200"
         style={{ marginLeft: mainMargin }}
       >
+        {userLoadError && (
+          <div role="alert" className="mx-4 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive lg:mx-6">
+            <span>{userLoadError}</span>
+            <button type="button" onClick={loadCurrentUser} className="font-semibold underline underline-offset-2">
+              Retry
+            </button>
+          </div>
+        )}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}

@@ -7,9 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
-// import { signInWithPopup } from "firebase/auth";
-// import { auth, provider } from "../firebase";
-import axios from "axios";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -109,28 +106,6 @@ export default function Login() {
   //     setLoading(false);
   //   }
   // };
-  const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/google`,
-        {
-          full_name: result.user.displayName,
-          email: result.user.email,
-          avatar_url: result.user.photoURL,
-        },
-      );
-
-      localStorage.setItem("token", response.data.token);
-      api.auth.setUser(response.data);
-
-      // redirect
-      window.location.href = "/personal";
-    } catch (error) {
-      console.error(error);
-    }
-  };
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(0,0,0,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.06),transparent_50%)]" />

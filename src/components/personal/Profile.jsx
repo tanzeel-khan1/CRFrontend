@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/apiClient";
 import { toast } from "sonner";
 import { BadgeCheck, Moon, Pencil, Save, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const currentUser = api.auth.getUser();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -50,7 +52,12 @@ const Profile = () => {
       });
       api.auth.setUser(res.user);
       setIsEditing(false);
-      toast.success("Profile updated successfully 🚀");
+      if (!res.user.isEmailVerified) {
+        toast.success("Verification code sent. Verify your new email to sign in again.");
+        navigate("/verify-otp", { state: { email: res.user.email } });
+      } else {
+        toast.success("Profile updated successfully 🚀");
+      }
     } catch (error) {
       toast.error(error?.message || "Update failed ❌");
     } finally {
