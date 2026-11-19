@@ -115,7 +115,7 @@ export default function TopBar({ sidebarWidth, showMenuButton, onOpenCommand, on
               )}
             </div>
             <ScrollArea className="max-h-64">
-              {activityError && <p role="status" className="border-b border-border px-3 py-2 text-xs text-destructive">Activity updates paused. Retrying automatically.</p>}
+              {/* {activityError && <p role="status" className="border-b border-border px-3 py-2 text-xs text-destructive">Activity updates paused. Retrying automatically.</p>} */}
               {activities.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-6">{activityError ? 'Unable to load activity right now.' : 'No activity yet'}</p>
               ) : (

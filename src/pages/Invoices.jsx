@@ -15,8 +15,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { CURRENCIES, formatCurrency } from '@/lib/currency';
 
 const STATUSES = ['draft', 'sent', 'viewed', 'paid', 'overdue', 'archived'];
 
@@ -38,7 +40,7 @@ export default function Invoices() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [tab, setTab] = useState('all');
-  const [form, setForm] = useState({ title: '', amount: 0, tax_amount: 0, recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft' });
+  const [form, setForm] = useState({ title: '', amount: 0, tax_amount: 0, currency: activeCompany.currency || 'USD', recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft' });
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [emailDialog, setEmailDialog] = useState(false);
   const [emailTarget, setEmailTarget] = useState(null);
@@ -54,6 +56,8 @@ export default function Invoices() {
     initialData: [],
   });
 
+  const defaultCurrency = invoices[0]?.currency || activeCompany.currency || 'USD';
+
   const createMutation = useMutation({
     mutationFn: (data) => api.entities.Invoice.create({
       ...data,
@@ -63,7 +67,8 @@ export default function Invoices() {
     }),
     onSuccess: (inv) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      logActivity(`Invoice created: ${inv.title}`, `Amount: $${inv.total_amount || inv.amount}`);
+      queryClient.invalidateQueries({ queryKey: ['invoices-analytics'] });
+      logActivity(`Invoice created: ${inv.title}`, `Amount: ${formatCurrency(inv.total_amount || inv.amount, inv.currency)}`);
       toast.success(`Invoice "${inv.title}" created`);
       closeDialog();
     },
@@ -73,6 +78,7 @@ export default function Invoices() {
     mutationFn: ({ id, data }) => api.entities.Invoice.update(id, data),
     onSuccess: (inv) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices-analytics'] });
       logActivity(`Invoice updated: ${inv.title}`, `Status: ${inv.status}`);
       toast.success(`Invoice updated`);
       closeDialog();
@@ -83,15 +89,22 @@ export default function Invoices() {
     mutationFn: (id) => api.entities.Invoice.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices-analytics'] });
       toast.success('Invoice deleted');
     },
   });
 
-  const closeDialog = () => { setDialogOpen(false); setEditing(null); setForm({ title: '', amount: 0, tax_amount: 0, recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft' }); };
+  const closeDialog = () => { setDialogOpen(false); setEditing(null); setForm({ title: '', amount: 0, tax_amount: 0, currency: defaultCurrency, recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft' }); };
+
+  const openCreateDialog = () => {
+    setEditing(null);
+    setForm({ title: '', amount: 0, tax_amount: 0, currency: defaultCurrency, recipient_name: '', recipient_email: '', due_date: '', notes: '', status: 'draft' });
+    setDialogOpen(true);
+  };
 
   const openEdit = (inv) => {
     setEditing(inv);
-    setForm({ title: inv.title, amount: inv.amount, tax_amount: inv.tax_amount || 0, recipient_name: inv.recipient_name || '', recipient_email: inv.recipient_email || '', due_date: inv.due_date || '', notes: inv.notes || '', status: inv.status });
+    setForm({ title: inv.title, amount: inv.amount, tax_amount: inv.tax_amount || 0, currency: inv.currency || activeCompany.currency || 'USD', recipient_name: inv.recipient_name || '', recipient_email: inv.recipient_email || '', due_date: inv.due_date || '', notes: inv.notes || '', status: inv.status });
     setDialogOpen(true);
   };
 
@@ -124,6 +137,7 @@ export default function Invoices() {
           amount: inv.amount || 0,
           tax_amount: inv.tax_amount || 0,
           total_amount: inv.total_amount || inv.amount || 0,
+          currency: inv.currency || activeCompany.currency || 'USD',
           due_date: inv.due_date || '',
           status: inv.status || 'draft',
           notes: inv.notes || '',
@@ -142,7 +156,10 @@ export default function Invoices() {
     setEmailTarget(null);
   };
 
-  const totalValue = invoices.reduce((sum, inv) => sum + Number(inv.total_amount || inv.amount || 0), 0);
+  const dashboardCurrency = invoices[0]?.currency || activeCompany.currency || 'USD';
+  const totalValue = invoices
+    .filter(inv => (inv.currency || activeCompany.currency || 'USD') === dashboardCurrency)
+    .reduce((sum, inv) => sum + Number(inv.total_amount || inv.amount || 0), 0);
   const paidCount = invoices.filter((inv) => inv.status === 'paid').length;
   const overdueCount = invoices.filter((inv) => inv.status === 'overdue').length;
 
@@ -155,7 +172,7 @@ export default function Invoices() {
             <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Invoices</h1>
             <p className="mt-2 max-w-lg text-sm leading-6 text-background/70">{invoices.length} invoices across this workspace.</p>
           </div>
-          <Button onClick={() => setDialogOpen(true)} disabled={!companyId} variant="secondary" className="gap-2 w-full sm:w-auto"><Plus className="w-4 h-4" /> Create Invoice</Button>
+          <Button onClick={openCreateDialog} disabled={!companyId} variant="secondary" className="gap-2 w-full sm:w-auto"><Plus className="w-4 h-4" /> Create Invoice</Button>
         </div>
         <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full border-[24px] border-background/10" />
       </section>
@@ -163,7 +180,7 @@ export default function Invoices() {
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           { label: 'Total invoices', value: invoices.length, icon: FileText },
-          { label: 'Billed', value: `$${totalValue.toLocaleString()}`, icon: DollarSign },
+          { label: 'Billed', value: formatCurrency(totalValue, dashboardCurrency), icon: DollarSign },
           { label: 'Paid', value: paidCount, icon: CheckCircle2 },
           { label: 'Overdue', value: overdueCount, icon: Clock },
         ].map(({ label, value, icon: Icon }) => (
@@ -218,7 +235,7 @@ export default function Invoices() {
                         <p className="mt-0.5 text-xs text-muted-foreground">{inv.invoice_number}</p>
                       </td>
                       <td className="px-5 py-3.5 text-sm">{inv.recipient_name || '—'}</td>
-                      <td className="px-5 py-3.5 text-sm font-semibold tracking-tight">${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
+                      <td className="px-5 py-3.5 text-sm font-semibold tracking-tight">{formatCurrency(inv.total_amount || inv.amount || 0, inv.currency || activeCompany.currency)}</td>
                       <td className="px-5 py-3.5 text-sm text-muted-foreground">{inv.due_date ? format(new Date(inv.due_date), 'MMM d, yyyy') : '—'}</td>
                       <td className="px-5 py-3.5">
                         <Badge className={`text-xs capitalize shadow-sm ${statusStyles[inv.status] || ''}`}>{inv.status}</Badge>
@@ -285,7 +302,7 @@ export default function Invoices() {
           </div>
           <div className="space-y-5 bg-muted/30 p-6 sm:p-7">
             <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-4 border-b border-border pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Invoice preview</p><p className="mt-2 text-lg font-semibold">{emailTarget?.title}</p><p className="mt-1 text-xs text-muted-foreground">{emailTarget?.invoice_number || 'Invoice'}</p></div><div className="text-right"><p className="text-2xl font-bold tracking-tight">${Number(emailTarget?.total_amount || emailTarget?.amount || 0).toLocaleString()}</p><Badge className="mt-2 capitalize">{emailTarget?.status || 'draft'}</Badge></div></div>
+              <div className="flex items-start justify-between gap-4 border-b border-border pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Invoice preview</p><p className="mt-2 text-lg font-semibold">{emailTarget?.title}</p><p className="mt-1 text-xs text-muted-foreground">{emailTarget?.invoice_number || 'Invoice'}</p></div><div className="text-right"><p className="text-2xl font-bold tracking-tight">{formatCurrency(emailTarget?.total_amount || emailTarget?.amount || 0, emailTarget?.currency || activeCompany.currency)}</p><Badge className="mt-2 capitalize">{emailTarget?.status || 'draft'}</Badge></div></div>
               <div className="grid grid-cols-2 gap-4 pt-4 text-sm"><div><p className="text-xs text-muted-foreground">Recipient</p><p className="mt-1 font-medium">{emailTarget?.recipient_name || 'Client'}</p></div><div className="text-right"><p className="text-xs text-muted-foreground">Due date</p><p className="mt-1 font-medium">{emailTarget?.due_date ? format(new Date(emailTarget.due_date), 'MMM d, yyyy') : 'Not set'}</p></div></div>
             </div>
             <div className="rounded-2xl border border-border bg-card p-5 shadow-sm"><div className="space-y-2"><Label htmlFor="invoice-email" className="text-xs font-semibold">Recipient email</Label><Input id="invoice-email" value={emailTo} onChange={e => setEmailTo(e.target.value)} placeholder="recipient@example.com" type="email" className="h-11 bg-background" /><p className="text-xs text-muted-foreground">The recipient will receive the invoice details and due date.</p></div></div>
@@ -295,44 +312,54 @@ export default function Invoices() {
       </Dialog>
 
       <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
-        <DialogContent className="flex max-h-[calc(100vh-2rem)] max-w-3xl flex-col gap-0 overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
-          <div className="shrink-0 border-b border-background/10 bg-foreground px-5 py-5 text-background sm:px-7">
+        <DialogContent className="flex max-h-[88vh] w-[calc(100%-1rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-2xl border border-border/70 bg-background p-0 text-background shadow-[0_24px_80px_-20px_rgba(0,0,0,0.5)]">
+          <div className="relative shrink-0 overflow-hidden border-b border-background/10 bg-gradient-to-br from-foreground via-foreground to-foreground/90 px-5 py-4 sm:px-6">
+            <div className="pointer-events-none absolute -right-8 -top-14 h-36 w-36 rounded-full border-[18px] border-background/[0.06]" />
+            <div className="pointer-events-none absolute right-16 top-6 h-20 w-20 rounded-full bg-background/[0.04] blur-2xl" />
             <DialogHeader>
-              <div className="flex items-start gap-3 pr-8">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background text-foreground"><FileText className="h-5 w-5" /></div>
-                <div><DialogTitle className="font-display text-2xl text-background">{editing ? 'Edit invoice' : 'Create an invoice'}</DialogTitle><p className="mt-1 text-sm text-background/70">Set the recipient, amount, and payment details.</p></div>
+              <div className="relative flex items-center gap-3 pr-8">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-background/15 bg-background/10 text-background shadow-inner"><FileText className="h-5 w-5" /></div>
+                <div className="min-w-0">
+                  <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-background/55">Billing workspace</p>
+                  <DialogTitle className="font-display text-xl tracking-tight text-background">{editing ? 'Edit invoice' : 'Create invoice'}</DialogTitle>
+                </div>
+                <Badge className="ml-auto border border-background/15 bg-background/10 text-[10px] capitalize text-background">{form.status}</Badge>
               </div>
             </DialogHeader>
           </div>
-          <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-muted/30 px-5 py-6 sm:px-7">
-              <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
-                <div className="mb-4"><h3 className="text-sm font-semibold">Invoice details</h3><p className="text-xs text-muted-foreground">Give this charge a clear reference.</p></div>
-                <div className="space-y-1.5"><Label htmlFor="invoice-title" className="text-xs font-semibold">Invoice title</Label><Input id="invoice-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Invoice title" className="h-11 bg-background" /></div>
-              </section>
-              <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
-                <div className="mb-4"><h3 className="text-sm font-semibold">Recipient</h3><p className="text-xs text-muted-foreground">Who should receive this invoice?</p></div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5"><Label htmlFor="invoice-recipient-name" className="text-xs font-semibold">Recipient name</Label><Input id="invoice-recipient-name" value={form.recipient_name} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} placeholder="Client name" className="h-11 bg-background" /></div>
-                  <div className="space-y-1.5"><Label htmlFor="invoice-recipient-email" className="text-xs font-semibold">Recipient email</Label><Input id="invoice-recipient-email" type="email" value={form.recipient_email} onChange={(e) => setForm({ ...form, recipient_email: e.target.value })} placeholder="client@example.com" className="h-11 bg-background" /></div>
+          <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col text-foreground">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-muted/20 px-4 py-4 sm:px-5">
+              <section className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <div><h3 className="text-xs font-semibold">Invoice & recipient</h3><p className="mt-0.5 text-[11px] text-muted-foreground">Who is this invoice for?</p></div>
+                  <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">Required details</span>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5 sm:col-span-2"><Label htmlFor="invoice-title" className="text-[11px] font-semibold">Invoice title</Label><Input id="invoice-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Property consultation" className="h-9 bg-background text-sm" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="invoice-recipient-name" className="text-[11px] font-semibold">Recipient</Label><Input id="invoice-recipient-name" value={form.recipient_name} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} placeholder="Client name" className="h-9 bg-background text-sm" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="invoice-recipient-email" className="text-[11px] font-semibold">Email</Label><Input id="invoice-recipient-email" type="email" value={form.recipient_email} onChange={(e) => setForm({ ...form, recipient_email: e.target.value })} placeholder="client@example.com" className="h-9 bg-background text-sm" /></div>
                 </div>
               </section>
-              <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
-                <div className="mb-4"><h3 className="text-sm font-semibold">Payment details</h3><p className="text-xs text-muted-foreground">Amount, tax, and due date.</p></div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <div className="space-y-1.5"><Label htmlFor="invoice-amount" className="text-xs font-semibold">Amount ($)</Label><Input id="invoice-amount" type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })} className="h-11 bg-background" /></div>
-                  <div className="space-y-1.5"><Label htmlFor="invoice-tax" className="text-xs font-semibold">Tax ($)</Label><Input id="invoice-tax" type="number" min="0" step="0.01" value={form.tax_amount} onChange={(e) => setForm({ ...form, tax_amount: Number(e.target.value) })} className="h-11 bg-background" /></div>
-                  <div className="space-y-1.5"><Label htmlFor="invoice-due-date" className="text-xs font-semibold">Due date</Label><Input id="invoice-due-date" type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} className="h-11 bg-background" /></div>
+              <section className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">
+                <div className="mb-3"><h3 className="text-xs font-semibold">Payment details</h3><p className="mt-0.5 text-[11px] text-muted-foreground">Set amount, currency, and due date.</p></div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="space-y-1.5"><Label htmlFor="invoice-currency" className="text-[11px] font-semibold">Currency</Label><Select value={form.currency} onValueChange={(currency) => setForm({ ...form, currency })}><SelectTrigger id="invoice-currency" className="h-9 bg-background px-2.5 text-sm"><SelectValue /></SelectTrigger><SelectContent>{CURRENCIES.map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}</SelectContent></Select></div>
+                  <div className="space-y-1.5"><Label htmlFor="invoice-amount" className="text-[11px] font-semibold">Amount</Label><Input id="invoice-amount" type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })} className="h-9 bg-background px-2.5 text-sm" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="invoice-tax" className="text-[11px] font-semibold">Tax</Label><Input id="invoice-tax" type="number" min="0" step="0.01" value={form.tax_amount} onChange={(e) => setForm({ ...form, tax_amount: Number(e.target.value) })} className="h-9 bg-background px-2.5 text-sm" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="invoice-due-date" className="text-[11px] font-semibold">Due date</Label><Input id="invoice-due-date" type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} className="h-9 bg-background px-2.5 text-sm" /></div>
                 </div>
-                <div className="mt-4 flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3"><span className="text-sm text-muted-foreground">Total due</span><span className="text-lg font-semibold tabular-nums">${(Number(form.amount || 0) + Number(form.tax_amount || 0)).toLocaleString()}</span></div>
+                <div className="mt-3 flex items-center justify-between rounded-lg border border-border/70 bg-muted/35 px-3.5 py-2.5">
+                  <div><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Total due</p><p className="mt-0.5 text-[10px] text-muted-foreground">Including tax · {form.currency}</p></div>
+                  <span className="font-display text-xl font-semibold tracking-tight tabular-nums">{formatCurrency(Number(form.amount || 0) + Number(form.tax_amount || 0), form.currency)}</span>
+                </div>
               </section>
-              <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
-                <div className="space-y-1.5"><Label htmlFor="invoice-notes" className="text-xs font-semibold">Notes</Label><Textarea id="invoice-notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Add payment instructions or a note for the recipient." className="resize-none bg-background" /></div>
+              <section className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">
+                <div className="space-y-1.5"><Label htmlFor="invoice-notes" className="text-[11px] font-semibold">Notes <span className="font-normal text-muted-foreground">(optional)</span></Label><Textarea id="invoice-notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} placeholder="Payment instructions or a short note..." className="min-h-16 resize-y bg-background text-sm" /></div>
               </section>
             </div>
-            <DialogFooter className="shrink-0 gap-2 border-t border-border bg-card px-5 py-4 sm:px-7 sm:space-x-0">
-              <Button type="button" variant="outline" onClick={closeDialog}>Cancel</Button>
-              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>{createMutation.isPending || updateMutation.isPending ? 'Saving...' : editing ? 'Update invoice' : 'Create invoice'}</Button>
+            <DialogFooter className="shrink-0 gap-2 border-t border-border bg-card px-4 py-3 sm:px-5 sm:space-x-0">
+              <Button type="button" variant="outline" onClick={closeDialog} className="h-9">Cancel</Button>
+              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="h-9 min-w-32 shadow-sm">{createMutation.isPending || updateMutation.isPending ? 'Saving...' : editing ? 'Save changes' : 'Create invoice'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

@@ -4,6 +4,7 @@ import { Building2, ArrowRight, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { api } from '@/api/apiClient';
+import { formatCurrency } from '@/lib/currency';
 
 export default function CompaniesSection({
   companies,
@@ -109,8 +110,10 @@ export default function CompaniesSection({
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
           {localCompanies.map((c) => {
-            const revenue = allInvoices
-              .filter((i) => i.status === 'paid' && i.company_id === c.id)
+            const companyInvoices = allInvoices.filter((i) => i.company_id === c.id);
+            const currency = companyInvoices[0]?.currency || c.currency || 'USD';
+            const revenue = companyInvoices
+              .filter((i) => i.status === 'paid' && (i.currency || c.currency || 'USD') === currency)
               .reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
 
             const expenses = allExpenses
@@ -153,15 +156,15 @@ export default function CompaniesSection({
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
                   <div className="rounded-3xl p-4 text-left">
                     <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-700">Revenue</p>
-                    <p className="mt-2 text-lg font-semibold text-emerald-900">${revenue.toLocaleString()}</p>
+                    <p className="mt-2 text-lg font-semibold text-emerald-900">{formatCurrency(revenue, currency)}</p>
                   </div>
                   <div className="rounded-3xl p-4 text-left">
                     <p className="text-[11px] uppercase tracking-[0.22em] text-rose-700">Expenses</p>
-                    <p className="mt-2 text-lg font-semibold text-rose-900">${expenses.toLocaleString()}</p>
+                    <p className="mt-2 text-lg font-semibold text-rose-900">{formatCurrency(expenses, currency)}</p>
                   </div>
                   <div className={`rounded-3xl p-4 text-left ${profit >= 0 ? '' : 'bg-rose-50 text-rose-800'}`}>
                     <p className="text-[11px] uppercase tracking-[0.22em]">Profit</p>
-                    <p className="mt-2 text-lg font-semibold">${profit.toLocaleString()}</p>
+                    <p className="mt-2 text-lg font-semibold">{formatCurrency(profit, currency)}</p>
                   </div>
                 </div>
 

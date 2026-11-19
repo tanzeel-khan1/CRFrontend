@@ -24,14 +24,20 @@ import {
   Legend,
 } from "recharts";
 import jsPDF from "jspdf";
+import { formatCurrency, formatCurrencyCode } from "@/lib/currency";
 
 export default function OverviewSection({
   currentUser,
   companies,
   allInvoices,
   allExpenses,
+  activeCompany,
 }) {
-  const totalRevenue = allInvoices
+  const dashboardCurrency = allInvoices[0]?.currency || activeCompany?.currency || "USD";
+  const currencyInvoices = allInvoices.filter(
+    (invoice) => (invoice.currency || activeCompany?.currency || "USD") === dashboardCurrency
+  );
+  const totalRevenue = currencyInvoices
     .filter((i) => i.status === "paid")
     .reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
 
@@ -43,7 +49,7 @@ export default function OverviewSection({
   const profitMargin =
     totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : 0;
 
-  const pendingRevenue = allInvoices
+  const pendingRevenue = currencyInvoices
     .filter((i) => i.status !== "paid")
     .reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
 
@@ -53,7 +59,7 @@ export default function OverviewSection({
       const start = startOfMonth(date);
       const end = endOfMonth(date);
 
-      const rev = allInvoices
+      const rev = currencyInvoices
         .filter(
           (inv) =>
             inv.status === "paid" &&
@@ -75,7 +81,7 @@ export default function OverviewSection({
         Expenses: exp,
       };
     });
-  }, [allInvoices, allExpenses]);
+  }, [allInvoices, allExpenses, dashboardCurrency, activeCompany?.currency]);
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
@@ -83,11 +89,11 @@ export default function OverviewSection({
     doc.text("Financial Report", 20, 20);
 
     const rows = [
-      ["Total Revenue", `$${totalRevenue.toLocaleString()}`],
-      ["Total Expenses", `$${totalExpensesAmt.toLocaleString()}`],
-      ["Net Profit", `$${netProfit.toLocaleString()}`],
+      ["Total Revenue", formatCurrencyCode(totalRevenue, dashboardCurrency)],
+      ["Total Expenses", formatCurrencyCode(totalExpensesAmt, dashboardCurrency)],
+      ["Net Profit", formatCurrencyCode(netProfit, dashboardCurrency)],
       ["Profit Margin", `${profitMargin}%`],
-      ["Pending Revenue", `$${pendingRevenue.toLocaleString()}`],
+      ["Pending Revenue", formatCurrencyCode(pendingRevenue, dashboardCurrency)],
     ];
 
     let y = 40;
@@ -116,17 +122,17 @@ export default function OverviewSection({
         <StatCard
           icon={<DollarSign />}
           label="Revenue"
-          value={`$${totalRevenue.toLocaleString()}`}
+          value={formatCurrency(totalRevenue, dashboardCurrency)}
         />
         <StatCard
           icon={<TrendingDown />}
           label="Expenses"
-          value={`$${totalExpensesAmt.toLocaleString()}`}
+          value={formatCurrency(totalExpensesAmt, dashboardCurrency)}
         />
         <StatCard
           icon={<TrendingUp />}
           label="Profit"
-          value={`$${netProfit.toLocaleString()}`}
+          value={formatCurrency(netProfit, dashboardCurrency)}
         />
         <StatCard
           icon={<BarChart2 />}
@@ -140,8 +146,8 @@ export default function OverviewSection({
           <AreaChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
+            <YAxis tickFormatter={(value) => formatCurrency(value, dashboardCurrency)} />
+            <Tooltip formatter={(value, name) => [formatCurrency(value, dashboardCurrency), name]} />
             <Legend />
             <Area dataKey="Revenue" stroke="#22c55e" fill="#22c55e33" />
             <Area dataKey="Expenses" stroke="#ef4444" fill="#ef444433" />
@@ -152,10 +158,13 @@ export default function OverviewSection({
       <div className="rounded-xl border p-4">
         <h2 className="mb-3 font-semibold">Companies</h2>
         {companies.map((company) => {
-          const revenue = allInvoices
+          const companyCurrency = allInvoices.find((invoice) => invoice.company_id === company.id)?.currency || company.currency || dashboardCurrency;
+          const companyInvoices = allInvoices.filter(
+            (invoice) => invoice.company_id === company.id && (invoice.currency || company.currency || dashboardCurrency) === companyCurrency
+          );
+          const revenue = companyInvoices
             .filter(
-              (invoice) =>
-                invoice.status === "paid" && invoice.company_id === company.id
+              (invoice) => invoice.status === "paid"
             )
             .reduce((sum, invoice) => sum + (invoice.total_amount || invoice.amount || 0), 0);
           const expenses = allExpenses
@@ -168,7 +177,7 @@ export default function OverviewSection({
           return (
             <div key={company.id} className="flex justify-between py-2">
               <span>{company.name}</span>
-              <span>${(revenue - expenses).toLocaleString()}</span>
+              <span>{formatCurrency(revenue - expenses, companyCurrency)}</span>
             </div>
           );
         })}

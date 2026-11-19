@@ -5,6 +5,7 @@ import { api } from '@/api/apiClient';
 import { ArrowUpRight, ArrowDownRight, ChevronRight, TrendingUp, Download } from 'lucide-react';
 import TableSkeleton from '@/components/ui/TableSkeleton';
 import { Button } from '@/components/ui/button';
+import { formatCurrency, formatCurrencyCode } from '@/lib/currency';
 import jsPDF from 'jspdf';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip,
@@ -13,25 +14,25 @@ import {
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-const CustomBarTooltip = ({ active, payload, label }) => {
+const CustomBarTooltip = ({ active, payload, label, currency }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-card border border-border rounded-lg p-3 shadow-lg text-xs space-y-1">
       <p className="font-semibold mb-1">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }}>{p.name}: ${p.value.toLocaleString()}</p>
+        <p key={i} style={{ color: p.color }}>{p.name}: {formatCurrency(p.value, currency)}</p>
       ))}
     </div>
   );
 };
 
-const CustomLineTooltip = ({ active, payload, label }) => {
+const CustomLineTooltip = ({ active, payload, label, currency }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-card border border-border rounded-lg p-3 shadow-lg text-xs space-y-1">
       <p className="font-semibold mb-1">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }}>{p.name}: ${p.value.toLocaleString()}</p>
+        <p key={i} style={{ color: p.color }}>{formatCurrency(p.value, currency)}</p>
       ))}
     </div>
   );
@@ -56,15 +57,17 @@ export default function Dashboard() {
 
   const isLoading = expLoading || invLoading;
 
+  const dashboardCurrency = invoices[0]?.currency || activeCompany?.currency || 'USD';
+  const currencyInvoices = invoices.filter(i => (i.currency || activeCompany?.currency || 'USD') === dashboardCurrency);
   const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-  const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
+  const totalRevenue = currencyInvoices.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
   const netProfit = totalRevenue - totalExpenses;
-  const paidInvoices = invoices.filter(i => i.status === 'paid');
+  const paidInvoices = currencyInvoices.filter(i => i.status === 'paid');
   const totalPaid = paidInvoices.reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
 
   // Build monthly chart data from real invoices & expenses
   const monthlyData = MONTHS.map((month, idx) => {
-    const rev = invoices
+    const rev = currencyInvoices
       .filter(i => i.status === 'paid' && i.due_date && new Date(i.due_date).getMonth() === idx)
       .reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
     const exp = expenses
@@ -110,15 +113,15 @@ export default function Dashboard() {
     const yearExpenses = expenses
       .filter(e => e.date && new Date(e.date).getFullYear() === currentYear)
       .reduce((s, e) => s + (e.amount || 0), 0);
-    const yearRevenue = invoices
+    const yearRevenue = currencyInvoices
       .filter(i => i.status === 'paid' && i.due_date && new Date(i.due_date).getFullYear() === currentYear)
       .reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
     const yearProfit = yearRevenue - yearExpenses;
 
     const summaryRows = [
-      ['Total Revenue', `$${yearRevenue.toLocaleString()}`],
-      ['Total Expenses', `$${yearExpenses.toLocaleString()}`],
-      ['Net Profit / Loss', `$${yearProfit.toLocaleString()}`],
+      ['Total Revenue', formatCurrencyCode(yearRevenue, dashboardCurrency)],
+      ['Total Expenses', formatCurrencyCode(yearExpenses, dashboardCurrency)],
+      ['Net Profit / Loss', formatCurrencyCode(yearProfit, dashboardCurrency)],
     ];
 
     summaryRows.forEach(([label, value], i) => {
@@ -158,7 +161,7 @@ export default function Dashboard() {
     y += 6;
 
     MONTHS.forEach((month, idx) => {
-      const rev = invoices
+      const rev = currencyInvoices
         .filter(i => i.status === 'paid' && i.due_date && new Date(i.due_date).getMonth() === idx && new Date(i.due_date).getFullYear() === currentYear)
         .reduce((s, i) => s + (i.total_amount || i.amount || 0), 0);
       const exp = expenses
@@ -170,10 +173,10 @@ export default function Dashboard() {
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(9);
       doc.text(month, 14, y);
-      doc.text(`$${rev.toLocaleString()}`, 85, y, { align: 'right' });
-      doc.text(`$${exp.toLocaleString()}`, 140, y, { align: 'right' });
+      doc.text(formatCurrencyCode(rev, dashboardCurrency), 85, y, { align: 'right' });
+      doc.text(formatCurrencyCode(exp, dashboardCurrency), 140, y, { align: 'right' });
       doc.setTextColor(profit >= 0 ? 30 : 200, profit >= 0 ? 130 : 0, profit >= 0 ? 60 : 0);
-      doc.text(`$${profit.toLocaleString()}`, pageW - 14, y, { align: 'right' });
+      doc.text(formatCurrencyCode(profit, dashboardCurrency), pageW - 14, y, { align: 'right' });
       doc.setDrawColor(240, 240, 240);
       doc.line(14, y + 2, pageW - 14, y + 2);
       y += 8;
@@ -189,8 +192,8 @@ export default function Dashboard() {
   };
 
   const metricCards = [
-    { label: 'Monthly Revenue', value: `$${(totalRevenue / 12).toLocaleString(undefined, { maximumFractionDigits: 0 })}`, change: 6.1, positive: true },
-    { label: 'Net Profit', value: `$${netProfit.toLocaleString()}`, change: netProfit >= 0 ? 8.4 : -4.2, positive: netProfit >= 0 },
+    { label: 'Monthly Revenue', value: formatCurrency(totalRevenue / 12, dashboardCurrency), change: 6.1, positive: true },
+    { label: 'Net Profit', value: formatCurrency(netProfit, dashboardCurrency), change: netProfit >= 0 ? 8.4 : -4.2, positive: netProfit >= 0 },
   ];
 
   return (
@@ -226,7 +229,7 @@ export default function Dashboard() {
             </h2>
             <p className="mt-1 text-xs text-background/50">Best performer this month</p>
             <div className="mt-5">
-              <p className="text-3xl font-semibold tracking-tight">${totalExpenses.toLocaleString()}</p>
+              <p className="text-3xl font-semibold tracking-tight">{formatCurrency(totalExpenses, dashboardCurrency)}</p>
               <p className="mt-1 flex items-center gap-1 text-xs text-background/50">
                 <ArrowUpRight className="h-3 w-3" /> +12% from last month
               </p>
@@ -268,11 +271,11 @@ export default function Dashboard() {
             <div className="flex gap-5 text-right text-xs">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Revenue</p>
-                <p className="mt-1 text-sm font-semibold">${totalRevenue.toLocaleString()}</p>
+                <p className="mt-1 text-sm font-semibold">{formatCurrency(totalRevenue, dashboardCurrency)}</p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Expenses</p>
-                <p className="mt-1 text-sm font-semibold">${totalExpenses.toLocaleString()}</p>
+                <p className="mt-1 text-sm font-semibold">{formatCurrency(totalExpenses, dashboardCurrency)}</p>
               </div>
             </div>
           </div>
@@ -280,7 +283,7 @@ export default function Dashboard() {
             <BarChart data={monthlyData} barCategoryGap="30%" barGap={2}>
               <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis hide />
-              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.4)' }} />
+              <Tooltip content={<CustomBarTooltip currency={dashboardCurrency} />} cursor={{ fill: 'hsl(var(--muted) / 0.4)' }} />
               <Bar dataKey="revenue" name="Revenue" fill="hsl(var(--foreground))" radius={[4, 4, 0, 0]} />
               <Bar dataKey="expenses" name="Expenses" fill="hsl(var(--muted-foreground) / 0.35)" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -294,7 +297,7 @@ export default function Dashboard() {
               <p className="eyebrow mb-1">Trend</p>
               <h3 className="text-base font-semibold">Profit Trend</h3>
               <div className="flex items-center gap-2 mt-2">
-                <p className="text-3xl font-semibold tracking-tight">${totalPaid.toLocaleString()}</p>
+                <p className="text-3xl font-semibold tracking-tight">{formatCurrency(totalPaid, dashboardCurrency)}</p>
                 <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5 bg-emerald-500/10 rounded-full px-2 py-0.5">
                   <ArrowUpRight className="w-3 h-3" /> +2.5%
                 </span>
@@ -308,7 +311,7 @@ export default function Dashboard() {
             <LineChart data={monthlyData}>
               <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis hide />
-              <Tooltip content={<CustomLineTooltip />} />
+              <Tooltip content={<CustomLineTooltip currency={dashboardCurrency} />} />
               <Line type="monotone" dataKey="revenue" name="Revenue" stroke="hsl(var(--foreground))" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
               <Line type="monotone" dataKey="expenses" name="Expenses" stroke="hsl(var(--muted-foreground) / 0.4)" strokeWidth={2} dot={false} />
             </LineChart>
@@ -347,7 +350,7 @@ export default function Dashboard() {
                   <tr key={inv.id} className="text-sm transition-colors hover:bg-muted/30">
                     <td className="py-2.5 font-medium">{inv.title}</td>
                     <td className="py-2.5 text-muted-foreground hidden sm:table-cell">{inv.recipient_name || '—'}</td>
-                    <td className="py-2.5 text-right font-semibold">${(inv.total_amount || inv.amount || 0).toLocaleString()}</td>
+                    <td className="py-2.5 text-right font-semibold">{formatCurrency(inv.total_amount || inv.amount || 0, inv.currency || dashboardCurrency)}</td>
                     <td className="py-2.5 text-right">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         inv.status === 'paid' ? 'bg-primary/10 text-primary' :
