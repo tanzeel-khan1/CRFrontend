@@ -60,5 +60,4 @@ export default [
       "react-hooks/rules-of-hooks": "error",
     },
   },
-<<<<<<< HEAD
 ];
