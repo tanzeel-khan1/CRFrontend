@@ -78,9 +78,3 @@ pnpm-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
-
-
-<<<<<<< HEAD
-=======
-config.bat
->>>>>>> 8d36b6316cd78a6fe351cbc0a12eb973c1622e77
